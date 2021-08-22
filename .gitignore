@@ -2,4 +2,4 @@ DEVNOTES.md
 .env
 /wordpress*
 .idea/
-phar/
+dev-utils/

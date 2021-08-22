@@ -18,4 +18,7 @@ cp -r jds-demo-plugin/ wordpress/wp-content/plugins/
 
 echo "copied plugin files to wordpress installation"
 echo ""
+
+# backticks below are not intended to execute
+# shellcheck disable=SC2016
 echo 'execute `docker compose up` to launch'
