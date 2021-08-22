@@ -1,7 +1,14 @@
 {
   "autoload": {
-	"psr-4": {
-	  "JdsDemoPlugin\\": "src/"
-	}
+    "psr-4": {
+      "JdsDemoPlugin\\": "src/"
+    }
+  },
+  "require": {
+    "twig/twig": "^3.0",
+    "php-di/php-di": "^6.3"
+  },
+  "require-dev": {
+    "codeception/codeception": "^4.1"
   }
 }
