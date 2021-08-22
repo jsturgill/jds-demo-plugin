@@ -4,11 +4,12 @@ namespace JdsDemoPlugin;
 
 use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
 use JdsDemoPlugin\WordPressApi\WordPressMenu;
-use JdsDemoPlugin\WordPressApi\WordPressMenuFactory;
 
 class Plugin {
 	const TEMPLATE_OPTIONS_MENU = 'jds-demo-plugin-options.twig';
 	private WordPressMenu $optionsMenu;
+
+	const NAME_BANK = [ 'You', 'Person', 'World', 'Dolly' ];
 
 	public function __construct( IWordPressMenuFactory $menuFactory ) {
 		$this->optionsMenu = $menuFactory->createMenuWithTemplate( "options-general.php",
@@ -17,7 +18,7 @@ class Plugin {
 			"manage_options",
 			"jds-demo-plugin-options",
 			$this::TEMPLATE_OPTIONS_MENU,
-			[ WordPressMenuFactory::class, 'emptyEnvironmentFactory' ]
+			fn() => [ 'audience' => self::NAME_BANK[ array_rand( self::NAME_BANK ) ] ]
 		);
 	}
 

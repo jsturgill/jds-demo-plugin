@@ -30,7 +30,10 @@ class DependencyContainer {
 	 * @throws Exception
 	 */
 	public static function create( ?string $rootPluginPath = null ): DI\Container {
-		$rootPluginPath = $rootPluginPath ?? dirname( ( __DIR__ ), 2 ) . DIRECTORY_SEPARATOR;
+		$rootPluginPath = $rootPluginPath ?? dirname( ( __DIR__ ), 2 );
+
+		// force a trailing slash
+		$rootPluginPath = rtrim( $rootPluginPath, FileSystem::PATH_SEPARATORS ) . "/";
 
 		if ( array_key_exists( $rootPluginPath, DependencyContainer::$containerMap ) ) {
 			return DependencyContainer::$containerMap[ $rootPluginPath ];
@@ -42,7 +45,7 @@ class DependencyContainer {
 		$containerBuilder->addDefinitions( [
 			'paths.pluginRoot'              => $rootPluginPath,
 			ConfigFactory::class            => function ( ContainerInterface $c ) {
-				return new ConfigFactory( $c->get( 'paths.pluginRoot' ) );
+				return new ConfigFactory( $c->get( FileSystem::class ), $c->get( 'paths.pluginRoot' ) );
 			},
 			TemplateConfig::class           => function ( ContainerInterface $c ) {
 				/** @var ConfigFactory $configFactory */
@@ -63,7 +66,6 @@ class DependencyContainer {
 				return new FilesystemLoader( $templateConfig->templateRootPath );
 			},
 			Environment::class              => function ( ContainerInterface $c ) {
-
 				/** @var TemplateConfig $templateConfig */
 				$templateConfig = $c->get( TemplateConfig::class );
 
@@ -75,10 +77,15 @@ class DependencyContainer {
 					return __( $text, 'jds-demo-plugin-domain' );
 				} ) );
 
+				$twig->addFunction( new TwigFunction( '_e', function ( $text ) {
+					_e( $text, 'jds-demo-plugin-domain' );
+				} ) );
+
 				return $twig;
 			},
+			TwigTextExtractor::class        => DI\autowire( TwigTextExtractor::class ),
 			IWordPressMenuFactory::class    => DI\autowire( WordPressMenuFactory::class ),
-			Plugin::class                   => DI\create( Plugin::class )->constructor( DI\get( WordPressMenuFactory::class ) ),
+			Plugin::class                   => DI\autowire( Plugin::class ),
 			FileSystem::class               => DI\create( FileSystem::class )->constructor( $rootPluginPath, true )
 		] );
 

@@ -3,13 +3,19 @@
 namespace JdsDemoPlugin\Config;
 
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
+use JdsDemoPlugin\Services\FileSystem;
+use Twig\Environment;
 
 class TwigTextExtractionConfig {
+	public string $inputDir;
 	public string $outputDir;
+	public int $inputPathLength;
 	public const DOMAIN = 'jds-demo-plugin-domain';
 
-	public function __construct( string $outputDir ) {
-		$this->outputDir = $outputDir;
+	public function __construct( TemplateConfig $templateConfig, string $outputDir ) {
+		$this->outputDir       = rtrim( $outputDir, FileSystem::PATH_SEPARATORS );
+		$this->inputDir        = rtrim( $templateConfig->templateRootPath, FileSystem::PATH_SEPARATORS );
+		$this->inputPathLength = mb_strlen( $templateConfig->templateRootPath );
 	}
 
 	/**

@@ -5,7 +5,6 @@ namespace JdsDemoPlugin\Services;
 use FilesystemIterator;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
-use JdsDemoPlugin\Plugin;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
@@ -19,6 +18,7 @@ use SplFileInfo;
  * or a child of the plugin directory.
  */
 class FileSystem {
+	const PATH_SEPARATORS = '/\\';
 	private string $root;
 	private int $rootLength;
 
@@ -31,9 +31,8 @@ class FileSystem {
 		return '.gitignore' !== $fileInfo->getFilename();
 	}
 
-
 	public function forceTrailingSlash( $path ): string {
-		return rtrim( $path, '/\\' ) . '/';
+		return rtrim( $path, self::PATH_SEPARATORS ) . '/';
 	}
 
 	/**
@@ -71,33 +70,58 @@ class FileSystem {
 		return $realPath;
 	}
 
+	private function createFileInfoIterator( $path ): RecursiveIteratorIterator {
+		return new RecursiveIteratorIterator(
+			new RecursiveDirectoryIterator( $path, FilesystemIterator::SKIP_DOTS ),
+			RecursiveIteratorIterator::CHILD_FIRST
+		);
+	}
+
 	/**
 	 * Clear a directory of files
 	 *
-	 * An optional filter can determine which files, if any, to keep.
+	 * An optional predicate (filter) callback can determine which files, if any, to keep.
 	 *
-	 * The filter will receive a `SplFileInfo` object as a parameter.
+	 * The predicate will receive a `SplFileInfo` object as a parameter.
 	 *
 	 * @throws InvalidArgumentException
 	 * @throws CommandFailureException
 	 * @see FileSystem::deleteAllButGitignore an example filter implementation
 	 */
-	public function emptyDirectory( string $path, ?callable $filter = null ): void {
-		$path   = $this->toAbsoluteSafePath( $path );
-		$filter = $filter ?? [ FileSystem::class, 'deleteAllFilter' ];
-		$files  = new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator( $path, FilesystemIterator::SKIP_DOTS ),
-			RecursiveIteratorIterator::CHILD_FIRST
-		);
+	public function emptyDirectory( string $path, ?callable $predicate = null ): void {
+		$path      = $this->toAbsoluteSafePath( $path );
+		$predicate = $predicate ?? [ FileSystem::class, 'deleteAllFilter' ];
+		$iterator  = $this->createFileInfoIterator( $path );
 		/** @var SplFileInfo $fileInfo */
-		foreach ( $files as $fileInfo ) {
-			if ( $filter( $fileInfo ) ) {
+		foreach ( $iterator as $fileInfo ) {
+			if ( $predicate( $fileInfo ) ) {
 				$result = $fileInfo->isDir()
 					? rmdir( $fileInfo->getRealPath() )
 					: unlink( $fileInfo->getRealPath() );
 				if ( $result !== true ) {
 					throw new CommandFailureException( "Unable to delete file or directory: {$fileInfo->getRealPath()}" );
 				}
+			}
+		}
+	}
+
+	/**
+	 * Process files in a directory
+	 *
+	 * The delegate will receive all files. Directories will be passed to the delegate
+	 * if the $includeDirectories flag is set to true.
+	 * @throws InvalidArgumentException
+	 */
+	public function processFiles( string $path, callable $delegate, bool $includeDirectories = false ): void {
+		$path = $this->toAbsoluteSafePath( $path );
+		if ( ! is_callable( $delegate ) ) {
+			throw new InvalidArgumentException( 'The delegate parameter must be callable' );
+		}
+		$iterator = $this->createFileInfoIterator( $path );
+		/** @var SplFileInfo $fileInfo */
+		foreach ( $iterator as $fileInfo ) {
+			if ( $fileInfo->isFile() || $includeDirectories ) {
+				$delegate( $fileInfo );
 			}
 		}
 	}

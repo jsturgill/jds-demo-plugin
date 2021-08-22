@@ -2,7 +2,7 @@
 
 namespace JdsDemoPlugin\Config;
 
-use JdsDemoPlugin\Config\TemplateConfig;
+use JdsDemoPlugin\Services\FileSystem;
 
 class ConfigFactory {
 	const PATH_PARTIAL_TEMPLATES = "templates";
@@ -13,20 +13,49 @@ class ConfigFactory {
 
 	protected string $pluginRootPath;
 
-	public function __construct( string $rootPluginPath ) {
-		$trailingChar = substr( $rootPluginPath, - 1 );
-		if ( $trailingChar !== DIRECTORY_SEPARATOR && $trailingChar !== '/' ) {
-			$rootPluginPath = $rootPluginPath . '/';
-		}
-		$this->pluginRootPath = $rootPluginPath;
+	public array $cache;
+
+	public function __construct( FileSystem $fileSystem, string $rootPluginPath ) {
+		$this->pluginRootPath = $fileSystem->forceTrailingSlash( $rootPluginPath );
+	}
+
+	/**
+	 * @param class-string<T> $className
+	 * @param string $key
+	 * @param callable $callback
+	 *
+	 * @return T
+	 * @noinspection PhpUndefinedClassInspection
+	 */
+	private function getOrCache( string $className, string $key, callable $callback ): object {
+		$this->cache[ $key ] = $this->cache[ $key ] ?? $callback();
+
+		return $this->cache[ $key ];
 	}
 
 	public function createTemplateConfig(): TemplateConfig {
-		return new TemplateConfig( $this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATES,
-			$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATE_CACHE );
+		/** @var TemplateConfig $result */
+		/** @noinspection PhpUnnecessaryLocalVariableInspection */
+		$result = $this->getOrCache( TemplateConfig::class,
+			'templateConfig',
+			fn() => new TemplateConfig(
+				$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATES,
+				$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATE_CACHE
+			) );
+
+		return $result;
 	}
 
 	public function createTwigTextExtractionConfig(): TwigTextExtractionConfig {
-		return new TwigTextExtractionConfig( $this->pluginRootPath . $this::PATH_PARTIAL_TWIG_TEXT_CACHE );
+		/** @var TwigTextExtractionConfig $result */
+		/** @noinspection PhpUnnecessaryLocalVariableInspection */
+		$result = $this->getOrCache( TwigTextExtractionConfig::class,
+			'twigTextExtractionConfig',
+			fn() => new TwigTextExtractionConfig(
+				$this->createTemplateConfig(),
+				$this->pluginRootPath . $this::PATH_PARTIAL_TWIG_TEXT_CACHE )
+		);
+
+		return $result;
 	}
 }

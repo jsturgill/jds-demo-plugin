@@ -19,10 +19,18 @@ following `.phar` files to be present:
 If you have those files installed somewhere else, or installed globally, it should be straightforward to modify the
 provided commands for your dev environment.
 
+## Tests
+
+```bash
+# from within the ./jds-demo-plugin directory
+cd jds-demo-plugin
+php vendor/bin/codecept run
+```
+
 ## Updating the .pot file
 
 ```bash
-# from within the jds-demo-plugin path
+# from within the ./jds-demo-plugin directory
 cd jds-demo-plugin
 
 # below parses twig templates and creates a dummy file with translated strings

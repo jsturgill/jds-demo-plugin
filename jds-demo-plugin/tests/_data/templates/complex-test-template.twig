@@ -1,0 +1,8 @@
+<p>{{ __('Hello %s')|format(name) }}</p>
+
+<div>
+	<span>
+		<a href="https://google.com">{{ __("%s")|format(foobar) }}</a>
+		<a href="https://google.com">{{ __("%s")|format('NOT INCLUDED') }}</a>
+	</span>
+</div>
