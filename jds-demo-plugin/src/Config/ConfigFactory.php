@@ -9,6 +9,8 @@ class ConfigFactory {
 	const PATH_PARTIAL_CACHE_ROOT = "cache";
 	const PATH_PARTIAL_TEMPLATE_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/templates";
 	const PATH_PARTIAL_DI_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/di";
+	const PATH_PARTIAL_TWIG_TEXT_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/gettext";
+
 	protected string $pluginRootPath;
 
 	public function __construct( string $rootPluginPath ) {
@@ -22,5 +24,9 @@ class ConfigFactory {
 	public function createTemplateConfig(): TemplateConfig {
 		return new TemplateConfig( $this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATES,
 			$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATE_CACHE );
+	}
+
+	public function createTwigTextExtractionConfig(): TwigTextExtractionConfig {
+		return new TwigTextExtractionConfig( $this->pluginRootPath . $this::PATH_PARTIAL_TWIG_TEXT_CACHE );
 	}
 }
