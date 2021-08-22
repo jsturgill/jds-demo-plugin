@@ -4,7 +4,6 @@ namespace JdsDemoPlugin\Services;
 
 use DI;
 use Exception;
-use http\Env;
 use JdsDemoPlugin\Config\ConfigFactory;
 use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Config\TwigTextExtractionConfig;
@@ -31,12 +30,12 @@ class DependencyContainer {
 	 * @throws Exception
 	 */
 	public static function create( ?string $rootPluginPath = null ): DI\Container {
-		$rootPluginPath = $rootPluginPath === null
-			? dirname( ( __DIR__ ), 2 ) . DIRECTORY_SEPARATOR
-			: $rootPluginPath;
+		$rootPluginPath = $rootPluginPath ?? dirname( ( __DIR__ ), 2 ) . DIRECTORY_SEPARATOR;
+
 		if ( array_key_exists( $rootPluginPath, DependencyContainer::$containerMap ) ) {
 			return DependencyContainer::$containerMap[ $rootPluginPath ];
 		}
+
 		$containerBuilder = new DI\ContainerBuilder();
 		$containerBuilder->enableCompilation( $rootPluginPath . ConfigFactory::PATH_PARTIAL_DI_CACHE );
 
@@ -79,7 +78,8 @@ class DependencyContainer {
 				return $twig;
 			},
 			IWordPressMenuFactory::class    => DI\autowire( WordPressMenuFactory::class ),
-			Plugin::class                   => DI\create( Plugin::class )->constructor( DI\get( WordPressMenuFactory::class ) )
+			Plugin::class                   => DI\create( Plugin::class )->constructor( DI\get( WordPressMenuFactory::class ) ),
+			FileSystem::class               => DI\create( FileSystem::class )->constructor( $rootPluginPath, true )
 		] );
 
 		self::$containerMap[ $rootPluginPath ] = $containerBuilder->build();

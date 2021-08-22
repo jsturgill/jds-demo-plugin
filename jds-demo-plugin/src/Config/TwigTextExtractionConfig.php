@@ -5,11 +5,11 @@ namespace JdsDemoPlugin\Config;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 
 class TwigTextExtractionConfig {
-	public string $extractionDir;
+	public string $outputDir;
 	public const DOMAIN = 'jds-demo-plugin-domain';
 
-	public function __construct( string $extractionDir ) {
-		$this->extractionDir = $extractionDir;
+	public function __construct( string $outputDir ) {
+		$this->outputDir = $outputDir;
 	}
 
 	/**
@@ -22,6 +22,6 @@ class TwigTextExtractionConfig {
 			throw new InvalidArgumentException( "Expected a .twig extension: $relativeTemplatePath" );
 		}
 
-		return $this->extractionDir . "/${pathinfo['dirname']}/${pathinfo['filename']}.php";
+		return $this->outputDir . "/${pathinfo['dirname']}/${pathinfo['filename']}.php";
 	}
 }

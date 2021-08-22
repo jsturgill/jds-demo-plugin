@@ -13,7 +13,7 @@
  * License:           GPL v2 or later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Update URI:        jds-demo-plugin
- * Text Domain:       jds-demo-plugin
+ * Text Domain:       jds-demo-plugin-domain
  * Domain Path:       /languages
  */
 
@@ -32,7 +32,7 @@ try {
 	$di = DependencyContainer::create( ROOT_PLUGIN_DIR );
 
 	/** @var Plugin $plugin */
-	$plugin = $di->get(Plugin::class);
-} catch (Exception $e) {
-	error_log("jds-demo-plugin failed to initialize: {$e->getMessage()}");
+	$plugin = $di->get( Plugin::class );
+} catch ( Exception $e ) {
+	error_log( "jds-demo-plugin failed to initialize: {$e->getMessage()}" );
 }

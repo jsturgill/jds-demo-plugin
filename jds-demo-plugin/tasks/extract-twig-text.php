@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnhandledExceptionInspection */
+
 /**
  * Extracts text in a gettext friendly format
  */
@@ -9,6 +10,7 @@ use Exception;
 use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Config\TwigTextExtractionConfig;
 use JdsDemoPlugin\Services\DependencyContainer;
+use JdsDemoPlugin\Services\FileSystem;
 use Twig\Environment;
 use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Node;
@@ -42,30 +44,32 @@ function extractText( Node $node, array &$text = [] ) {
 	}
 }
 
-try {
-	$di = DependencyContainer::create();
+$di = DependencyContainer::create();
 
-	/** @var Environment $twig */
-	$twig = $di->get( Environment::class );
+/** @var Environment $twig */
+$twig = $di->get( Environment::class );
 
-	/** @var TemplateConfig $templateConfig */
-	$templateConfig = $di->get( TemplateConfig::class );
+/** @var TemplateConfig $templateConfig */
+$templateConfig = $di->get( TemplateConfig::class );
 
-	/** @var TwigTextExtractionConfig $extractTextConfig */
-	$extractTextConfig = $di->get( TwigTextExtractionConfig::class );
-	$prefixLength      = mb_strlen( $templateConfig->templateRootPath ) + 1;
-	foreach ( glob( $templateConfig->templateRootPath . "/*.twig" ) as $absPath ) {
-		$relativePath = mb_substr( $absPath, $prefixLength );
-		$stream       = $twig->tokenize( new Source( file_get_contents( $absPath ), $relativePath, $absPath ) );
-		$nodes        = $twig->parse( $stream );
-		$text         = [];
-		foreach ( $nodes->getIterator() as $node ) {
-			extractText( $node, $text );
-		}
-		$lines = join( "\n", array_values( $text ) );
-		file_put_contents( $extractTextConfig->toOutputFilePath($relativePath), "<?php\n$lines\n" );
+/** @var TwigTextExtractionConfig $extractTextConfig */
+$extractTextConfig = $di->get( TwigTextExtractionConfig::class );
+$prefixLength      = mb_strlen( $templateConfig->templateRootPath ) + 1;
+
+/** @var FileSystem $fileSystem */
+$fileSystem = $di->get( FileSystem::class );
+
+$fileSystem->emptyDirectory( $extractTextConfig->outputDir, [ FileSystem::class, 'deleteAllButGitignore' ] );
+
+foreach ( glob( $templateConfig->templateRootPath . "/*.twig" ) as $absPath ) {
+	$relativePath = mb_substr( $absPath, $prefixLength );
+	$stream       = $twig->tokenize( new Source( file_get_contents( $absPath ), $relativePath, $absPath ) );
+	$nodes        = $twig->parse( $stream );
+	$text         = [];
+	foreach ( $nodes->getIterator() as $node ) {
+		extractText( $node, $text );
 	}
-} catch ( Exception $e ) {
-	error_log( "jds-demo-plugin failed to initialize: {$e->getMessage()}" );
+	$lines = join( "\n", array_values( $text ) );
+	file_put_contents( $extractTextConfig->toOutputFilePath( $relativePath ), "<?php\n$lines\n" );
 }
 
