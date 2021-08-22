@@ -32,6 +32,10 @@ class FileSystem {
 	}
 
 
+	public function forceTrailingSlash( $path ): string {
+		return rtrim( $path, '/\\' ) . '/';
+	}
+
 	/**
 	 * @throws InvalidArgumentException
 	 */
@@ -47,8 +51,8 @@ class FileSystem {
 		}
 
 		// check to see if the string looks like / or c:/ -- possible file system root paths
-		if ( preg_match( '/^(\/)|^([a-z]+:\/)/i', $realRoot ) ) {
-			trigger_error( "FileSystem created with the file system as a root path (this is dangerous)", E_USER_WARNING );
+		if ( preg_match( '/^(\/)$|^([a-z]+:\/)$/i', $realRoot ) ) {
+			trigger_error( "FileSystem created with the file system as a root path ($realRoot)", E_USER_WARNING );
 		}
 
 		$this->root       = $realRoot;
