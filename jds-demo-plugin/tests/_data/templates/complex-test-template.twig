@@ -1,8 +1,11 @@
-<p>{{ __('Hello %s')|format(name) }}</p>
+{# format with translator comment #}
+<p>{{ __('Hello %s', 'informal greeting')|format(name) }}</p>
 
 <div>
 	<span>
+		{# format without a comment #}
 		<a href="https://google.com">{{ __("%s")|format(foobar) }}</a>
-		<a href="https://google.com">{{ __("%s")|format('NOT INCLUDED') }}</a>
+		{# format with a hard-coded value #}
+		<a href="https://google.com">{{ __("another %s")|format('NOT A VARIABLE') }}</a>
 	</span>
 </div>

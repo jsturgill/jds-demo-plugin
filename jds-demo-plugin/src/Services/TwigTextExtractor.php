@@ -21,7 +21,7 @@ class TwigTextExtractor {
 	private Environment $twig;
 	private FileSystem $fileSystem;
 	private string $cleanDomain;
-	private static $skipIdentifier;
+	const TRANSLATOR_COMMENT_PREFIX = 'translators: ';
 
 	// TODO add support for _x, _n, _nx, _n_noop, _nx_noop
 	const TRANSLATION_FUNCTIONS = [ '__', '_e' ];
@@ -36,17 +36,39 @@ class TwigTextExtractor {
 		$this->fileSystem = $fileSystem;
 
 		$this->cleanDomain = addslashes( TwigTextExtractionConfig::DOMAIN );
+
 		if ( $this->cleanDomain !== TwigTextExtractionConfig::DOMAIN ) {
 			throw new Exception( "TwigTextExtractionConfig::DOMAIN const is terribly wrong" );
 		}
-		if ( false === $this::$skipIdentifier instanceof stdClass ) {
-			$this::$skipIdentifier = new stdClass();
-		}
 	}
 
-	private function isSkipEntry( $value ) {
-		return $value === $this::$skipIdentifier;
+	/**
+	 * Returns a string guaranteed not to contain line breaks or `?>`
+	 *
+	 * Ensures the string starts with the necessary translators prefix,
+	 * and adds `// ` to the start.
+	 *
+	 * Null incoming values are returned without modification.
+	 *
+	 * @param ?string $comment
+	 *
+	 * @return ?string
+	 * @see self::TRANSLATOR_COMMENT_PREFIX
+	 */
+	private function toValidSingleLineCommentString( ?string $comment ): ?string {
+		if ( null === $comment ) {
+			return null;
+		}
+		// mb_str_replace should not be needed here
+		$intermediate = str_replace( [ "\r", "\n", '?>' ], " ", $comment );
+
+		if ( ! str_starts_with( $intermediate, self::TRANSLATOR_COMMENT_PREFIX ) ) {
+			$intermediate = self::TRANSLATOR_COMMENT_PREFIX . $intermediate;
+		}
+
+		return "// $intermediate";
 	}
+
 
 	/**
 	 * @throws InvalidArgumentException
@@ -61,17 +83,20 @@ class TwigTextExtractor {
 	/**
 	 * @throws Exception
 	 */
-	private function extractFirstArgument( FunctionExpression $node ) {
-		$result = null;
+	private function extractArguments( FunctionExpression $node, $min = 1 ): array {
+		$result = [];
 		foreach ( $node->getNode( 'arguments' )->getIterator() as $argument ) {
-			$result = $argument->getAttribute( 'value' );
-			break;
+			array_push( $result, $argument->getAttribute( 'value' ) );
+		}
+		if ( count( $result ) < $min ) {
+			throw new InvalidArgumentException( "FunctionExpression node has " . count( $result ) . "arguments (minimum: $min)" );
 		}
 
 		return $result;
 	}
 
 	/**
+	 * Processes a translation function expression in a twig template
 	 * @throws Exception
 	 */
 	private function processFunctionExpression( FunctionExpression $node, array &$text ) {
@@ -79,13 +104,16 @@ class TwigTextExtractor {
 		if ( ! in_array( $name, self::TRANSLATION_FUNCTIONS ) ) {
 			return;
 		}
-		$textValue = $this->extractFirstArgument( $node );
+		$arguments = $this->extractArguments( $node );
+		$textValue = $arguments[0];
+		$comment   = array_key_exists( 1, $arguments ) ? $arguments[1] : null;
 		if ( array_key_exists( $textValue, $text ) ) {
 			return;
 		}
-		$cleanText = addslashes( $textValue );
 
-		$text[ $textValue ] = self::DEFAULT_EXPORT_FUNC . "('$cleanText', '$this->cleanDomain');";
+		$cleanText          = addslashes( $textValue );
+		$cleanComment       = $this->toValidSingleLineCommentString( $comment );
+		$text[ $textValue ] = "$cleanComment\n$name(\"$cleanText\", \"$this->cleanDomain\");";
 	}
 
 	/**
@@ -94,19 +122,28 @@ class TwigTextExtractor {
 	 * @link https://www.php.net/manual/en/language.variables.basics.php Source for valid PHP variable regex
 	 */
 	private function processFilterExpression( FilterExpression $node, array &$text ) {
+		// the filtered node should be a function expression where the
+		// function name is one of the supported translation functions
 		$filteredNode = $node->getNode( 'node' );
 
 		if ( false === $filteredNode instanceof FunctionExpression ) {
 			return;
 		}
 
-		if ( ! in_array( $filteredNode->getAttribute( 'name' ), self::TRANSLATION_FUNCTIONS ) ) {
+		$functionName = $filteredNode->getAttribute( 'name' );
+
+		if ( ! in_array( $functionName, self::TRANSLATION_FUNCTIONS ) ) {
 			return;
 		}
 
-		$textValue = $this->extractFirstArgument( $filteredNode );
-		$cleanText = addslashes( $textValue );
+		// extract the translation string
+		$arguments    = $this->extractArguments( $filteredNode );
+		$textValue    = $arguments[0];
+		$cleanText    = addslashes( $textValue );
+		$comment      = array_key_exists( 1, $arguments ) ? $arguments[1] : null;
+		$cleanComment = $this->toValidSingleLineCommentString( $comment );
 
+		// ensure the filter being processed is the 'format' filter
 		$filterNode = $node->getNode( 'filter' );
 		if ( 'format' !== $filterNode->getAttribute( 'value' ) ) {
 			return;
@@ -123,34 +160,27 @@ class TwigTextExtractor {
 				if ( ! preg_match( '/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$/', $arg ) ) {
 					throw new InvalidArgumentException( "Invalid PHP variable name: '$arg'" );
 				}
-				array_push( $arguments, $arg );
-			} else {
-				// hard-coded sprintf strings are not supported -- must have a variable name
-				// however, if a valid entry exists already for the same text, then
-				// don't overwrite it
-				if ( ! array_key_exists( $textValue, $text ) ) {
-					$text[ $textValue ] = $this::$skipIdentifier;
-				}
+				array_push( $arguments, '$' . $arg );
+			} elseif ( $argumentNode->hasAttribute( 'value' ) ) {
 
-				return;
+				array_push( $arguments, '"' . addslashes( $argumentNode->getAttribute( 'value' ) ) . '"' );
+
+			} else {
+				array_push( $arguments, '$unkownVariable' );
 			}
 
 		}
 
-		$cleanArgs = join( ', ',
-			array_map( fn( string $arg ) => '$' . $arg, $arguments )
-		);
+		$argString = join( ', ', $arguments );
 
-		$text[ $textValue ] = "sprintf( " . self::DEFAULT_EXPORT_FUNC . "( '$cleanText', '$this->cleanDomain'), $cleanArgs);";
+		$text[ $textValue ] = "$cleanComment\nsprintf( " . $functionName . "( \"$cleanText\", \"$this->cleanDomain\"), $argString);";
 	}
 
 	/**
 	 * Visits each node in and extracts translated strings
 	 * @throws Exception
 	 */
-	private function extractTextFromNode(
-		Node $node, array &$text = []
-	) {
+	private function processNode( Node $node, array &$text ) {
 		// sprintf format
 		if ( $node instanceof FilterExpression ) {
 			$this->processFilterExpression( $node, $text );
@@ -162,7 +192,7 @@ class TwigTextExtractor {
 		}
 		// todo pluralization?
 		foreach ( $node->getIterator() as $childNode ) {
-			$this->extractTextFromNode( $childNode, $text );
+			$this->processNode( $childNode, $text );
 		}
 	}
 
@@ -170,10 +200,7 @@ class TwigTextExtractor {
 	 * @throws SyntaxError
 	 * @throws Exception
 	 */
-	public
-	function processTwigTemplate(
-		SplFileInfo $fileInfo
-	): void {
+	public function processTwigTemplate( SplFileInfo $fileInfo ): void {
 		if ( 'twig' !== $fileInfo->getExtension() ) {
 			return;
 		}
@@ -187,22 +214,20 @@ class TwigTextExtractor {
 		);
 		$nodes        = $this->twig->parse( $stream );
 		$text         = [];
+
 		foreach ( $nodes->getIterator() as $node ) {
-			$this->extractTextFromNode( $node, $text );
+			$this->processNode( $node, $text );
 		}
 
 		// filter out skip entries and join together as lines of code to write out
-		$lines = join( "\n", array_filter(
-				array_values( $text ), fn( $x ) => false === $this::isSkipEntry( $x ) )
-		);
+		$lines = join( "\n", array_values( $text ) );
 		file_put_contents( $this->config->toOutputFilePath( $relativePath ), "<?php\n$lines\n" );
 	}
 
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public
-	function extractText(): void {
+	public function extractText(): void {
 		$this->fileSystem->processFiles( $this->config->inputDir, [ $this, 'processTwigTemplate' ] );
 	}
 }
