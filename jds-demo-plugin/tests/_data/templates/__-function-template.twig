@@ -1,0 +1,14 @@
+<!-- format with a comment -->
+<p>{{ __('Hello %s', 'informal greeting')|format(name) }}</p>
+<!-- simple with a comment -->
+<p>{{ __('It\'s nice to see you.', 'informal') }}</p>
+<!-- simple without a comment -->
+<p>{{ __('How has your day been?') }}</p>
+<div>
+	<span>
+		<!-- format without a comment, variable parameter -->
+		<a href="https://google.com">{{ __("Please visit %s")|format(foobar) }}</a>
+		<!-- format without a comment, hard-coded parameter -->
+		<a href="https://google.com">{{ __("another %s")|format('NOT A VARIABLE') }}</a>
+	</span>
+</div>

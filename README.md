@@ -37,5 +37,5 @@ cd jds-demo-plugin
 php tasks/extract-twig-text.php
 
 # run wp-cli to create/update the .pot file
-php ../dev-utils/wp-cli.phar i18n make-pot . --ignore-domain languages/jds-demo-plugin.pot --path=../wordpress --include=cache/gettext/*.php --merge
+php ../dev-utils/wp-cli.phar i18n make-pot . --ignore-domain languages/jds-demo-plugin.pot --path=../wordpress --include=cache/gettext/*.php --exclude=tests/* --merge
 ```

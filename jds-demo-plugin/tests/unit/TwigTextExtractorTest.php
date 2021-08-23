@@ -18,8 +18,8 @@ class TwigTextExtractorTest extends \Codeception\Test\Unit {
 
 	const TEMPLATES_PATH_PARTIAL = TEST_FILES_ROOT . "/templates";
 	const OUTPUT_PATH_PARTIAL = TEST_FILES_ROOT . "/cache/gettext";
-	const SIMPLE_TEMPLATE_FILE_NAME = "simple-test-template";
-	const COMPLEX_TEMPLATE_FILE_NAME = 'complex-test-template';
+	const __TEST_TEMPLATE = "__-function-template";
+	const _E_TEST_TEMPLATE = '_e-function-template';
 
 	private function getGoldenMasterContents( string $fileName ): string {
 		return file_get_contents( GOLDEN_MASTERS_ROOT . "/TwigTextExtractor/$fileName." . GOLDEN_MASTERS_EXTENSION );
@@ -58,11 +58,11 @@ class TwigTextExtractorTest extends \Codeception\Test\Unit {
 	/**
 	 * @throws SyntaxError
 	 */
-	public function testSimpleTemplate() {
-		$this->testTemplateAgainstMaster( self::SIMPLE_TEMPLATE_FILE_NAME );
+	public function test__Template() {
+		$this->testTemplateAgainstMaster( self::__TEST_TEMPLATE );
 	}
 
-	public function testComplexTemplate() {
-		$this->testTemplateAgainstMaster( self::COMPLEX_TEMPLATE_FILE_NAME );
+	public function test_eTemplate() {
+		$this->testTemplateAgainstMaster( self::_E_TEST_TEMPLATE );
 	}
 }

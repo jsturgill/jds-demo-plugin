@@ -73,8 +73,21 @@ class CompiledContainer extends DI\CompiledContainer{
 					'cache' => $templateConfig->templateCachePath
 				] );
 
-				$twig->addFunction( new \Twig\TwigFunction( '__', function ( $text ) {
+				// each translation function has an additional trailing argument
+				// for comments that are ignored here
+				// -- however, the TwigTextExtractor class recognizes the argument
+				// if it is present
+				$twig->addFunction( new \Twig\TwigFunction( '__', function ( $text, $comment = null ) {
 					return __( $text, 'jds-demo-plugin-domain' );
+				} ) );
+
+				$twig->addFunction( new \Twig\TwigFunction( '_e', function ( $text, $comment = null ) {
+					if ( ! function_exists( '_e' ) ) {
+						function _e( $arg ) {
+							echo __( $arg );
+						}
+					}
+					_e( $text, 'jds-demo-plugin-domain' );
 				} ) );
 
 				return $twig;

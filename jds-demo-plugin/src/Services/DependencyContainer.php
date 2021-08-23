@@ -82,8 +82,12 @@ class DependencyContainer {
 				} ) );
 
 				$twig->addFunction( new TwigFunction( '_e', function ( $text, $comment = null ) {
-					/** @noinspection PhpUndefinedFunctionInspection */
-					\_e( $text, 'jds-demo-plugin-domain' );
+					if ( ! function_exists( '_e' ) ) {
+						function _e( $arg ) {
+							echo __( $arg );
+						}
+					}
+					_e( $text, 'jds-demo-plugin-domain' );
 				} ) );
 
 				return $twig;
