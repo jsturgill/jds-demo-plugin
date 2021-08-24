@@ -2,11 +2,13 @@
 
 ## Local Dev Environment
 
-To get started, copy `.env.template` to `.env` and update any values.
+To get started:
 
-Then run `init.sh` to download WordPress and stage the plugin files.
+1. copy `.env.template` to `.env` and update any values, then
+2. run `init.sh` to download WordPress and stage the plugin files, and then
+3. execute `docker compose up`
 
-Note: Curl is required (git bash will likely work on Windows).
+Note: Docker compose and curl are required. Should work with git bash on windows.
 
 ## Dev-Utils
 
@@ -38,4 +40,12 @@ php tasks/extract-twig-text.php
 
 # run wp-cli to create/update the .pot file
 php ../dev-utils/wp-cli.phar i18n make-pot . --ignore-domain languages/jds-demo-plugin.pot --path=../wordpress --include=cache/gettext/*.php --exclude=tests/* --merge
+```
+
+## Static Analysis
+
+```bash
+# from within the ./jds-demo-plugin directory
+cd jds-demo-plugin
+vendor/bin/phpstan analyse --memory-limit 1G
 ```
