@@ -93,6 +93,12 @@ class DependencyContainerFactory
 					_x($text, $context, 'jds-demo-plugin-domain');
 				}));
 
+				$twig->addFunction(new TwigFunction('_ex', function (string  $text,
+																	 string  $context,
+																	 ?string $comment = null): void {
+					_ex($text, $context, 'jds-demo-plugin-domain');
+				}));
+
 				$twig->addFunction(new TwigFunction('_n', function (string  $single,
 																	string  $plural,
 																	int     $number,
@@ -120,6 +126,17 @@ class DependencyContainerFactory
 																		  ?string $comment = null) {
 					_nx($single, $plural, $context, 'jds-demo-plugin-domain');
 				}));
+
+				// the following translation functions are not used by the TwigTextExtractor
+				$twig->addFunction(new TwigFunction('translate', function (string $text): string {
+					return translate($text, 'jds-demo-plugin-domain');
+				}));
+
+				$twig->addFunction(new TwigFunction('translate_nooped_plural', function (array $noopedPlural,
+																						 int   $count) {
+					translate_nooped_plural($noopedPlural, $count, 'jds-demo-plugin-domain');
+				}));
+
 
 				return $twig;
 			},
