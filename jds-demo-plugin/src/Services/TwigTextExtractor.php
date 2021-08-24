@@ -6,10 +6,12 @@ use Exception;
 use JdsDemoPlugin\Config\TwigTextExtractionConfig;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
+use JdsDemoPlugin\Services\TwigTextExtractor\Argument;
+use JdsDemoPlugin\Services\TwigTextExtractor\ArgumentRepresentations;
 use SplFileInfo;
-use stdClass;
 use Twig\Environment;
 use Twig\Error\SyntaxError;
+use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FilterExpression;
 use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Expression\NameExpression;
@@ -24,8 +26,13 @@ class TwigTextExtractor {
 	const TRANSLATOR_COMMENT_PREFIX = 'translators: ';
 
 	// TODO add support for _x, _n, _nx, _n_noop, _nx_noop
-	const TRANSLATION_FUNCTIONS = [ '__', '_e' ];
+	const TRANSLATION_FUNCTIONS = [ '__', '_e', '_x' ];
 	const DEFAULT_EXPORT_FUNC = '__';
+	const FUNCTIONS_TO_PARAM_COUNT_MAP = [
+		'__' => 1,
+		'_e' => 1,
+		'_x' => 2
+	];
 
 	/**
 	 * @throws Exception
@@ -43,34 +50,6 @@ class TwigTextExtractor {
 	}
 
 	/**
-	 * Returns a string guaranteed not to contain line breaks or `?>`
-	 *
-	 * Ensures the string starts with the necessary translators prefix,
-	 * and adds `// ` to the start.
-	 *
-	 * Null incoming values are returned without modification.
-	 *
-	 * @param ?string $comment
-	 *
-	 * @return ?string
-	 * @see self::TRANSLATOR_COMMENT_PREFIX
-	 */
-	private function toValidSingleLineCommentString( ?string $comment ): ?string {
-		if ( null === $comment ) {
-			return null;
-		}
-		// mb_str_replace should not be needed here
-		$intermediate = str_replace( [ "\r", "\n", '?>' ], " ", $comment );
-
-		if ( ! str_starts_with( $intermediate, self::TRANSLATOR_COMMENT_PREFIX ) ) {
-			$intermediate = self::TRANSLATOR_COMMENT_PREFIX . $intermediate;
-		}
-
-		return "// $intermediate";
-	}
-
-
-	/**
 	 * @throws InvalidArgumentException
 	 * @throws CommandFailureException
 	 */
@@ -81,13 +60,20 @@ class TwigTextExtractor {
 	}
 
 	/**
+	 * @return Argument[]
 	 * @throws Exception
 	 */
-	private function extractArguments( FunctionExpression $node, $min = 1 ): array {
-		$result = [];
-		foreach ( $node->getNode( 'arguments' )->getIterator() as $argument ) {
-			array_push( $result, $argument->getAttribute( 'value' ) );
+	private function extractArguments( Node $node, $min = 1 ): array {
+		if ( ! $node->hasNode( 'arguments' ) ) {
+			throw new InvalidArgumentException( "Cannot extract arguments from a node that does not have any" );
 		}
+
+		$result = [];
+
+		foreach ( $node->getNode( 'arguments' )->getIterator() as $argument ) {
+			array_push( $result, Argument::ofNode( $argument ) );
+		}
+
 		if ( count( $result ) < $min ) {
 			throw new InvalidArgumentException( "FunctionExpression node has " . count( $result ) . "arguments (minimum: $min)" );
 		}
@@ -97,7 +83,10 @@ class TwigTextExtractor {
 
 	/**
 	 * Processes a translation function expression in a twig template
+	 *
+	 * This is the simplest case.
 	 * @throws Exception
+	 * @see TwigTextExtractor::processFilterExpression the more complex "sprintf" style case
 	 */
 	private function processFunctionExpression( FunctionExpression $node, array &$text ) {
 		$name = $node->getAttribute( 'name' );
@@ -105,15 +94,53 @@ class TwigTextExtractor {
 			return;
 		}
 		$arguments = $this->extractArguments( $node );
-		$textValue = $arguments[0];
-		$comment   = array_key_exists( 1, $arguments ) ? $arguments[1] : null;
+		$textValue = $arguments[0]->stringValue;
+		// don't overwrite the value if it already exists
 		if ( array_key_exists( $textValue, $text ) ) {
 			return;
 		}
+		$text[ $textValue ] = $this->codeGenerator( $arguments,
+			$name,
+			self::FUNCTIONS_TO_PARAM_COUNT_MAP[ $name ]
+		);
+	}
 
-		$cleanText          = addslashes( $textValue );
-		$cleanComment       = $this->toValidSingleLineCommentString( $comment );
-		$text[ $textValue ] = "$cleanComment\n$name(\"$cleanText\", \"$this->cleanDomain\");";
+	private function codeGenerator(
+		$arguments,
+		$functionName,
+		int $paramCount = 1,
+		$wrapInSprintf = false,
+		$sprintfArgs = null
+	): string {
+		$comment      = array_key_exists( $paramCount, $arguments ) ? $arguments[ $paramCount ] : null;
+		$cleanComment = null !== $comment
+			? $comment->asComment( self::TRANSLATOR_COMMENT_PREFIX )
+			: null;
+		$argumentList = [];
+		$sprintfArgs  = [];
+		// collect all args except the first, up until the limit passed in as $paramCount
+		// -- the first arg counts, so if $paramCount === 1, then no arguments will be
+		// collected
+		foreach ( $arguments as $idx => $argument ) {
+			if ( $idx >= $paramCount ) {
+				array_push( $sprintfArgs, $argument );
+			}
+			array_push( $argumentList, $argument );
+		}
+
+		// escape, quote, separate with commas, and append the domain
+		$cleanArgs = join( ", ",
+				array_map( fn( $arg ) => $arg->asPhpCode(), $argumentList )
+		             ) . ", \"$this->cleanDomain\"";
+
+		$prefix = null === $cleanComment
+			? ""
+			: "$cleanComment\n";
+		if ( $wrapInSprintf ) {
+			return $prefix .= "sprintf( $functionName( $cleanArgs ) );";
+		}
+
+		return $prefix .= "$functionName( $cleanArgs );";
 	}
 
 	/**
@@ -136,44 +163,26 @@ class TwigTextExtractor {
 			return;
 		}
 
-		// extract the translation string
-		$arguments    = $this->extractArguments( $filteredNode );
-		$textValue    = $arguments[0];
-		$cleanText    = addslashes( $textValue );
-		$comment      = array_key_exists( 1, $arguments ) ? $arguments[1] : null;
-		$cleanComment = $this->toValidSingleLineCommentString( $comment );
-
 		// ensure the filter being processed is the 'format' filter
 		$filterNode = $node->getNode( 'filter' );
 		if ( 'format' !== $filterNode->getAttribute( 'value' ) ) {
 			return;
 		}
 
-		$argumentNodes = $node->getNode( 'arguments' );
-		$arguments     = [];
-		/** @var NameExpression $argumentNode */
-		foreach ( $argumentNodes as $argumentNode ) {
-			if ( $argumentNode->hasAttribute( 'name' ) ) {
-				$arg = $argumentNode->getAttribute( 'name' );
+		$translationArgs = $this->extractArguments( $filteredNode );
 
-				// see docblock for source of regex
-				if ( ! preg_match( '/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*$/', $arg ) ) {
-					throw new InvalidArgumentException( "Invalid PHP variable name: '$arg'" );
-				}
-				array_push( $arguments, '$' . $arg );
-			} elseif ( $argumentNode->hasAttribute( 'value' ) ) {
+		$formatArgs = $this->extractArguments( $node );
 
-				array_push( $arguments, '"' . addslashes( $argumentNode->getAttribute( 'value' ) ) . '"' );
+		$argString = join( ', ', array_map( fn( Argument $x ) => $x->asPhpCode(), $formatArgs ) );
 
-			} else {
-				array_push( $arguments, '$unkownVariable' );
-			}
-
-		}
-
-		$argString = join( ', ', $arguments );
-
-		$text[ $textValue ] = "$cleanComment\nsprintf( " . $functionName . "( \"$cleanText\", \"$this->cleanDomain\"), $argString);";
+		$textValue = $translationArgs[0]->stringValue;
+		//$text[ $textValue ] = "$cleanComment\nsprintf( " . $functionName . "( \"$cleanText\", \"$this->cleanDomain\"), $argString);";
+		$text[ $textValue ] = $this->codeGenerator( $formatArgs,
+			$functionName,
+			self::FUNCTIONS_TO_PARAM_COUNT_MAP[ $functionName ],
+			true,
+			$formatArgs
+		);
 	}
 
 	/**
