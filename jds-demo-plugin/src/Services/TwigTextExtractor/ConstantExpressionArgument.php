@@ -7,7 +7,10 @@ use Twig\Node\Expression\ConstantExpression;
 class ConstantExpressionArgument extends AbstractArgument implements IArgument
 {
 
-	private string $value;
+	/**
+	 * @var string|int|float
+	 */
+	private $value;
 
 	public function __construct(ConstantExpression $node)
 	{
@@ -21,6 +24,10 @@ class ConstantExpressionArgument extends AbstractArgument implements IArgument
 
 	public function asPhpCode(): string
 	{
+		if (is_int($this->value) || is_float($this->value)) {
+			return $this->value;
+		}
+
 		return $this->stringToPhpString($this->value);
 	}
 }
