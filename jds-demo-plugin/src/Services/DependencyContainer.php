@@ -77,17 +77,28 @@ class DependencyContainer {
 				// for comments that are ignored here
 				// -- however, the TwigTextExtractor class recognizes the argument
 				// if it is present
-				$twig->addFunction( new TwigFunction( '__', function ( $text, $comment = null ) {
+				$twig->addFunction( new TwigFunction( '__', function ( string $text, ?string $comment = null ): string {
 					return __( $text, 'jds-demo-plugin-domain' );
 				} ) );
 
-				$twig->addFunction( new TwigFunction( '_e', function ( $text, $comment = null ) {
+				$twig->addFunction( new TwigFunction( '_e', function ( string $text, ?string $comment = null ): void {
 					if ( ! function_exists( '_e' ) ) {
+						// dummy function -- actually equivalent to WP's version
 						function _e( $arg ) {
 							echo __( $arg );
 						}
 					}
 					_e( $text, 'jds-demo-plugin-domain' );
+				} ) );
+
+				$twig->addFunction( new TwigFunction( '_x', function ( string $text, string $context, $comment = null ) {
+					if ( ! function_exists( '_x' ) ) {
+						// dummy function -- not equivalent to WP's version
+						function _x( $arg ): string {
+							return __( $arg );
+						}
+					}
+					_x( $text, $context, 'jds-demo-plugin-domain' );
 				} ) );
 
 				return $twig;
