@@ -7,6 +7,9 @@ use JdsDemoPlugin\Config\TwigTextExtractionConfig;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\TwigTextExtractor\Argument;
+use JdsDemoPlugin\Services\TwigTextExtractor\ArgumentFactory;
+use JdsDemoPlugin\Services\TwigTextExtractor\IArgument;
+use PhpParser\Node\Arg;
 use SplFileInfo;
 use Twig\Environment;
 use Twig\Error\SyntaxError;
@@ -15,16 +18,19 @@ use Twig\Node\Expression\FunctionExpression;
 use Twig\Node\Node;
 use Twig\Source;
 
-class TwigTextExtractor {
+class TwigTextExtractor
+{
+	const TRANSLATOR_COMMENT_PREFIX = 'translators: ';
+
 	private TwigTextExtractionConfig $config;
 	private Environment $twig;
 	private FileSystem $fileSystem;
+	private ArgumentFactory $argumentFactory;
 	private string $cleanDomain;
-	const TRANSLATOR_COMMENT_PREFIX = 'translators: ';
 
-	// TODO add support for _x, _n, _nx, _n_noop, _nx_noop
-	const TRANSLATION_FUNCTIONS = [ '__', '_e', '_x' ];
-	const DEFAULT_EXPORT_FUNC = '__';
+
+	// TODO add support for _n, _nx, _n_noop, _nx_noop
+	const TRANSLATION_FUNCTIONS = ['__', '_e', '_x'];
 	const FUNCTIONS_TO_PARAM_COUNT_MAP = [
 		'__' => 1,
 		'_e' => 1,
@@ -34,15 +40,19 @@ class TwigTextExtractor {
 	/**
 	 * @throws Exception
 	 */
-	public function __construct( TwigTextExtractionConfig $config, Environment $twig, FileSystem $fileSystem ) {
-		$this->config     = $config;
-		$this->twig       = $twig;
+	public function __construct(TwigTextExtractionConfig $config,
+								Environment              $twig,
+								FileSystem               $fileSystem,
+								ArgumentFactory          $argumentFactory)
+	{
+		$this->config = $config;
+		$this->twig = $twig;
 		$this->fileSystem = $fileSystem;
+		$this->argumentFactory = $argumentFactory;
+		$this->cleanDomain = addslashes(TwigTextExtractionConfig::DOMAIN);
 
-		$this->cleanDomain = addslashes( TwigTextExtractionConfig::DOMAIN );
-
-		if ( $this->cleanDomain !== TwigTextExtractionConfig::DOMAIN ) {
-			throw new Exception( "TwigTextExtractionConfig::DOMAIN const is terribly wrong" );
+		if ($this->cleanDomain !== TwigTextExtractionConfig::DOMAIN) {
+			throw new Exception("TwigTextExtractionConfig::DOMAIN const is terribly wrong");
 		}
 	}
 
@@ -50,77 +60,80 @@ class TwigTextExtractor {
 	 * @throws InvalidArgumentException
 	 * @throws CommandFailureException
 	 */
-	public function clearExtractions(): void {
-		$this->fileSystem->emptyDirectory( $this->config->outputDir,
-			[ FileSystem::class, 'deleteAllButGitignore' ]
+	public function clearExtractions(): void
+	{
+		$this->fileSystem->emptyDirectory($this->config->outputDir,
+			[FileSystem::class, 'deleteAllButGitignore']
 		);
 	}
 
 	/**
-	 * @return Argument[]
+	 * @return IArgument[]
 	 * @throws Exception
 	 */
-	private function extractArguments( Node $node, $min = 1 ): array {
-		if ( ! $node->hasNode( 'arguments' ) ) {
-			throw new InvalidArgumentException( "Cannot extract arguments from a node that does not have any" );
+	private function extractArguments(Node $node, $min = 1): array
+	{
+		if (!$node->hasNode('arguments')) {
+			throw new InvalidArgumentException("Cannot extract arguments from a node that does not have any");
 		}
 
 		$result = [];
 
-		foreach ( $node->getNode( 'arguments' )->getIterator() as $argument ) {
-			array_push( $result, Argument::ofNode( $argument ) );
+		foreach ($node->getNode('arguments')->getIterator() as $argument) {
+			array_push($result, $this->argumentFactory->ofNode($argument));
 		}
 
-		if ( count( $result ) < $min ) {
-			throw new InvalidArgumentException( "FunctionExpression node has " . count( $result ) . "arguments (minimum: $min)" );
+		if (count($result) < $min) {
+			throw new InvalidArgumentException("FunctionExpression node has " . count($result) . "arguments (minimum: $min)");
 		}
 
 		return $result;
 	}
 
 	/**
-	 * @param Argument[] $translationFuncArgs
+	 * @param IArgument[] $translationFuncArgs
 	 * @param string $translationFuncName
 	 * @param int $translationFuncParamsCount do not include the domain parameter, which will always be included
 	 * @param bool $wrapInSprintf
-	 * @param Argument[]|null $sprintfArgs
+	 * @param IArgument[]|null $sprintfArgs
 	 *
 	 * @return string
 	 * @throws CommandFailureException
 	 * @see TwigTextExtractor::FUNCTIONS_TO_PARAM_COUNT_MAP
 	 */
 	private function codeGenerator(
-		array $translationFuncArgs,
+		array  $translationFuncArgs,
 		string $translationFuncName,
-		int $translationFuncParamsCount = 1,
-		bool $wrapInSprintf = false,
+		int    $translationFuncParamsCount = 1,
+		bool   $wrapInSprintf = false,
 		?array $sprintfArgs = null
-	): string {
-		if ( $translationFuncParamsCount < 1 ) {
-			throw new \http\Exception\InvalidArgumentException( "Each translation function requires at least 1 argument" );
+	): string
+	{
+		if ($translationFuncParamsCount < 1) {
+			throw new \http\Exception\InvalidArgumentException("Each translation function requires at least 1 argument");
 		}
 		// 0-based index means the param count is also the index of the optional comment parameter
-		$comment      = array_key_exists( $translationFuncParamsCount, $translationFuncArgs ) ? $translationFuncArgs[ $translationFuncParamsCount ] : null;
+		$comment = array_key_exists($translationFuncParamsCount, $translationFuncArgs) ? $translationFuncArgs[$translationFuncParamsCount] : null;
 		$cleanComment = null !== $comment
-			? $comment->asComment( self::TRANSLATOR_COMMENT_PREFIX )
+			? $comment->asComment(self::TRANSLATOR_COMMENT_PREFIX)
 			: null;
 
 		// reduce the arguments array to the expected length by dropping items
 		// from the tail end
-		while ( count( $translationFuncArgs ) > $translationFuncParamsCount ) {
-			array_pop( $translationFuncArgs );
+		while (count($translationFuncArgs) > $translationFuncParamsCount) {
+			array_pop($translationFuncArgs);
 		}
 
 		// escape, quote, separate with commas, and append the domain
-		$cleanTranslationFuncArgs = join( ", ",
-				array_map( fn( Argument $arg ) => $arg->asPhpCode(), $translationFuncArgs )
-		                            ) . ", \"$this->cleanDomain\"";
+		$cleanTranslationFuncArgs = join(", ",
+				array_map(fn(IArgument $arg) => $arg->asPhpCode(), $translationFuncArgs)
+			) . ", \"$this->cleanDomain\"";
 
-		$cleanSprintfArgs = ! is_array( $sprintfArgs )
+		$cleanSprintfArgs = !is_array($sprintfArgs)
 			? null
-			: join( ", ",
+			: join(", ",
 				array_map(
-					fn( Argument $arg ) => $arg->asPhpCode(), $sprintfArgs
+					fn(IArgument $arg) => $arg->asPhpCode(), $sprintfArgs
 				)
 			);
 
@@ -128,7 +141,7 @@ class TwigTextExtractor {
 			? ""
 			: "$cleanComment\n";
 
-		if ( $wrapInSprintf ) {
+		if ($wrapInSprintf) {
 			return $prefix .= "sprintf( $translationFuncName( $cleanTranslationFuncArgs ), $cleanSprintfArgs );";
 		}
 
@@ -142,59 +155,60 @@ class TwigTextExtractor {
 	 * @throws Exception
 	 * @see TwigTextExtractor::processFilterExpression the more complex "sprintf" style case
 	 */
-	private function processFunctionExpression( FunctionExpression $node, array &$text ) {
-		$name = $node->getAttribute( 'name' );
-		if ( ! in_array( $name, self::TRANSLATION_FUNCTIONS ) ) {
+	private function processFunctionExpression(FunctionExpression $node, array &$text)
+	{
+		$name = $node->getAttribute('name');
+		if (!in_array($name, self::TRANSLATION_FUNCTIONS)) {
 			return;
 		}
-		$arguments = $this->extractArguments( $node );
-		$textValue = $arguments[0]->stringValue;
+		$arguments = $this->extractArguments($node);
+		$textValue = $arguments[0]->asPhpCode();
 		// don't overwrite the value if it already exists
-		if ( array_key_exists( $textValue, $text ) ) {
+		if (array_key_exists($textValue, $text)) {
 			return;
 		}
-		$text[ $textValue ] = $this->codeGenerator( $arguments,
+		$text[$textValue] = $this->codeGenerator($arguments,
 			$name,
-			self::FUNCTIONS_TO_PARAM_COUNT_MAP[ $name ]
+			self::FUNCTIONS_TO_PARAM_COUNT_MAP[$name]
 		);
 	}
 
 	/**
 	 * @throws Exception
-	 * @link https://www.php.net/manual/en/language.variables.basics.php Source for valid PHP variable regex
 	 */
-	private function processFilterExpression( FilterExpression $node, array &$text ) {
+	private function processFilterExpression(FilterExpression $node, array &$text)
+	{
 		// the filtered node should be a function expression where the
 		// function name is one of the supported translation functions
-		$filteredNode = $node->getNode( 'node' );
+		$filteredNode = $node->getNode('node');
 
-		if ( false === $filteredNode instanceof FunctionExpression ) {
+		if (false === $filteredNode instanceof FunctionExpression) {
 			return;
 		}
 
-		$functionName = $filteredNode->getAttribute( 'name' );
+		$functionName = $filteredNode->getAttribute('name');
 
-		if ( ! in_array( $functionName, self::TRANSLATION_FUNCTIONS ) ) {
+		if (!in_array($functionName, self::TRANSLATION_FUNCTIONS)) {
 			return;
 		}
 
 		// ensure the filter being processed is the 'format' filter
-		$filterNode = $node->getNode( 'filter' );
-		if ( 'format' !== $filterNode->getAttribute( 'value' ) ) {
+		$filterNode = $node->getNode('filter');
+		if ('format' !== $filterNode->getAttribute('value')) {
 			return;
 		}
 
-		$translationArgs = $this->extractArguments( $filteredNode );
+		$translationArgs = $this->extractArguments($filteredNode);
 
-		$formatArgs = $this->extractArguments( $node );
+		$formatArgs = $this->extractArguments($node);
 
-		$argString = join( ', ', array_map( fn( Argument $x ) => $x->asPhpCode(), $formatArgs ) );
+		$argString = join(', ', array_map(fn(IArgument $x) => $x->asPhpCode(), $formatArgs));
 
-		$textValue = $translationArgs[0]->stringValue;
+		$textValue = $translationArgs[0]->asPhpCode();
 		//$text[ $textValue ] = "$cleanComment\nsprintf( " . $functionName . "( \"$cleanText\", \"$this->cleanDomain\"), $argString);";
-		$text[ $textValue ] = $this->codeGenerator( $translationArgs,
+		$text[$textValue] = $this->codeGenerator($translationArgs,
 			$functionName,
-			self::FUNCTIONS_TO_PARAM_COUNT_MAP[ $functionName ],
+			self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName],
 			true,
 			$formatArgs
 		);
@@ -204,19 +218,20 @@ class TwigTextExtractor {
 	 * Visits each node in and extracts translated strings
 	 * @throws Exception
 	 */
-	private function processNode( Node $node, array &$text ) {
+	private function processNode(Node $node, array &$text)
+	{
 		// sprintf format
-		if ( $node instanceof FilterExpression ) {
-			$this->processFilterExpression( $node, $text );
+		if ($node instanceof FilterExpression) {
+			$this->processFilterExpression($node, $text);
 		}
 
 		// simple strings
-		if ( $node instanceof FunctionExpression ) {
-			$this->processFunctionExpression( $node, $text );;
+		if ($node instanceof FunctionExpression) {
+			$this->processFunctionExpression($node, $text);;
 		}
 		// todo pluralization?
-		foreach ( $node->getIterator() as $childNode ) {
-			$this->processNode( $childNode, $text );
+		foreach ($node->getIterator() as $childNode) {
+			$this->processNode($childNode, $text);
 		}
 	}
 
@@ -224,34 +239,36 @@ class TwigTextExtractor {
 	 * @throws SyntaxError
 	 * @throws Exception
 	 */
-	public function processTwigTemplate( SplFileInfo $fileInfo ): void {
-		if ( 'twig' !== $fileInfo->getExtension() ) {
+	public function processTwigTemplate(SplFileInfo $fileInfo): void
+	{
+		if ('twig' !== $fileInfo->getExtension()) {
 			return;
 		}
 
 		// add one to input path to account for trailing slash
-		$relativePath = mb_substr( $fileInfo->getRealPath(), $this->config->inputPathLength + 1 );
-		$stream       = $this->twig->tokenize(
-			new Source( file_get_contents( $fileInfo->getRealPath() ),
+		$relativePath = mb_substr($fileInfo->getRealPath(), $this->config->inputPathLength + 1);
+		$stream = $this->twig->tokenize(
+			new Source(file_get_contents($fileInfo->getRealPath()),
 				$relativePath,
-				$fileInfo->getRealPath() )
+				$fileInfo->getRealPath())
 		);
-		$nodes        = $this->twig->parse( $stream );
-		$text         = [];
+		$nodes = $this->twig->parse($stream);
+		$text = [];
 
-		foreach ( $nodes->getIterator() as $node ) {
-			$this->processNode( $node, $text );
+		foreach ($nodes->getIterator() as $node) {
+			$this->processNode($node, $text);
 		}
 
 		// filter out skip entries and join together as lines of code to write out
-		$lines = join( "\n", array_values( $text ) );
-		file_put_contents( $this->config->toOutputFilePath( $relativePath ), "<?php\n$lines\n" );
+		$lines = join("\n", array_values($text));
+		file_put_contents($this->config->toOutputFilePath($relativePath), "<?php\n$lines\n");
 	}
 
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public function extractText(): void {
-		$this->fileSystem->processFiles( $this->config->inputDir, [ $this, 'processTwigTemplate' ] );
+	public function extractText(): void
+	{
+		$this->fileSystem->processFiles($this->config->inputDir, [$this, 'processTwigTemplate']);
 	}
 }
