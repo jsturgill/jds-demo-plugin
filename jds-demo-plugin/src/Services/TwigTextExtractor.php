@@ -28,7 +28,6 @@ class TwigTextExtractor
 
 
 	// TODO add support for _nx, _n_noop, _nx_noop
-	const TRANSLATION_FUNCTIONS = ['__', '_e', '_x'];
 	const FUNCTIONS_TO_PARAM_COUNT_MAP = [
 		'__' => 1,
 		'_e' => 1,
@@ -191,7 +190,7 @@ class TwigTextExtractor
 
 		$functionName = $filteredNode->getAttribute('name');
 
-		if (!in_array($functionName, self::TRANSLATION_FUNCTIONS)) {
+		if (!array_key_exists($functionName, self::FUNCTIONS_TO_PARAM_COUNT_MAP)) {
 			return;
 		}
 
