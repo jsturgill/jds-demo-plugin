@@ -110,4 +110,12 @@ class TwigTextExtractorTest extends Unit
 	{
 		$this->testTemplateAgainstMaster('_n_noop' . self::TEMPLATE_SUFFIX);
 	}
+
+	/**
+	 * @throws SyntaxError
+	 */
+	public function test_nx_noopTemplate()
+	{
+		$this->testTemplateAgainstMaster('_nx_noop' . self::TEMPLATE_SUFFIX);
+	}
 }
