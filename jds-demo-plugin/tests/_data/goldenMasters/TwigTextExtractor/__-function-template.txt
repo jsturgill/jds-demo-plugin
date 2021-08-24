@@ -1,11 +1,8 @@
 <?php
 // translators: informal greeting
-sprintf( __( "Hello %s", "jds-demo-plugin-domain"), $name);
+sprintf( __( "Hello %s", "jds-demo-plugin-domain" ), $name );
 // translators: informal
-__("It\'s nice to see " . $test, "jds-demo-plugin-domain");
-
-__($test2, "jds-demo-plugin-domain");
-
-sprintf( __( "Please visit %s", "jds-demo-plugin-domain"), $foobar);
-
-sprintf( __( "another %s", "jds-demo-plugin-domain"), "NOT A VARIABLE");
+__( "It\'s nice to see " . $test, "jds-demo-plugin-domain" );
+__( $test2, "jds-demo-plugin-domain" );
+sprintf( __( "Please visit %s", "jds-demo-plugin-domain" ), $foobar );
+sprintf( __( "another %s", "jds-demo-plugin-domain" ), "NOT A VARIABLE" );
