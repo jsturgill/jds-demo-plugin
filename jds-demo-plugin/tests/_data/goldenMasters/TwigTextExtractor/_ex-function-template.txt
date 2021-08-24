@@ -1,0 +1,8 @@
+<?php
+// translators: informal greeting
+sprintf( _ex( "Hello %s", "my context", "jds-demo-plugin-domain" ), $name );
+// translators: informal
+_ex( "It\'s nice to see " . $test, "my context", "jds-demo-plugin-domain" );
+_ex( $test2, "my context", "jds-demo-plugin-domain" );
+sprintf( _ex( "Please visit %s", "my context", "jds-demo-plugin-domain" ), $foobar );
+sprintf( _ex( "another %s", "my context", "jds-demo-plugin-domain" ), "NOT A VARIABLE" );

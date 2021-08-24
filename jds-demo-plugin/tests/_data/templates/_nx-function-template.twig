@@ -1,0 +1,13 @@
+<!-- format with comment & int -->
+<p>{{ _nx('There is one cat', 'There are %d cats', 5, 'my context', 'the number of cats')|format(cats) }}</p>
+<!-- format with comment & float -->
+<p>{{ _nx('There is one dog', 'There are %d dogs', 123.7, 'my context', 'the number of dogs')|format(dogs) }}</p>
+<!-- format with comment & scientific notation -->
+<p>{{ _nx('There is one thing', 'There are %d things', 0.000000043, 'my context', 'the number of things')|format(things) }}</p>
+
+<!-- simple with comment & int -->
+<p>{{ _nx('There is one lizard', 'There are %d lizards', 5, 'my context', 'the number of lizards') }}</p>
+<!-- simple with comment & float -->
+<p>{{ _nx('There is one frog', 'There are %d frogs', 123.7, 'my context', 'the number of frogs') }}</p>
+<!-- simple with comment & scientific notation -->
+<p>{{ _nx('There is one bagel', 'There are %d bagels', 0.000000043, 'my context', 'the number of bagels') }}</p>

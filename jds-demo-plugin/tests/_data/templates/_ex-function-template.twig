@@ -1,0 +1,16 @@
+<!-- format with a comment -->
+<p>{{ _ex('Hello %s', 'my context', 'informal greeting')|format(name) }}</p>
+<!-- simple with a comment + string concatenation -->
+{% set test = 'you.' %}
+<p>{{ _ex('It\'s nice to see ' ~ test, 'my context', 'informal') }}</p>
+<!-- simple without a comment, using a variable instead of a string -->
+{% set test2 = 'How has your day been' %}
+<p>{{ _ex(test2, 'my context') }}</p>
+<div>
+	<span>
+		<!-- format without a comment, variable parameter -->
+		<a href="https://google.com">{{ _ex("Please visit %s", 'my context')|format(foobar) }}</a>
+		<!-- format without a comment, hard-coded parameter -->
+		<a href="https://google.com">{{ _ex("another %s", 'my context')|format('NOT A VARIABLE') }}</a>
+	</span>
+</div>

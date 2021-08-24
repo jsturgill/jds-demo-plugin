@@ -1,0 +1,16 @@
+<!-- format with a comment -->
+<p>{{ _e('Hello %s', 'informal greeting')|format(name) }}</p>
+<!-- simple with a comment + string concatenation -->
+{% set test = 'you.' %}
+<p>{{ _e('It\'s nice to see ' ~ test, 'informal') }}</p>
+<!-- simple without a comment, using a variable instead of a string -->
+{% set test2 = 'How has your day been' %}
+<p>{{ _e(test2) }}</p>
+<div>
+	<span>
+		<!-- format without a comment, variable parameter -->
+		<a href="https://google.com">{{ _e("Please visit %s")|format(foobar) }}</a>
+		<!-- format without a comment, hard-coded parameter -->
+		<a href="https://google.com">{{ _e("another %s")|format('NOT A VARIABLE') }}</a>
+	</span>
+</div>

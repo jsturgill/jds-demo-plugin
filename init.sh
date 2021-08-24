@@ -21,4 +21,4 @@ echo ""
 
 # backticks below are not intended to execute
 # shellcheck disable=SC2016
-echo 'execute `docker compose up` to launch'
+echo 'execute `docker compose up` to launch, then visit localhost in your browser on the `LOCAL_PORT` specified in `.env`'

@@ -1,4 +1,5 @@
 # grabbed from https://github.com/WordPress/wordpress-develop/blob/master/.editorconfig
+# -- modifications at bottom
 
 # This file is for unifying the coding style for different editors and IDEs
 # editorconfig.org
@@ -24,3 +25,8 @@ trim_trailing_whitespace = false
 
 [{*.txt,wp-config-sample.php}]
 end_of_line = crlf
+
+# begin project-specific changes
+
+[jds-demo-plugin/tests/**.txt]
+end_of_line = lf

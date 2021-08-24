@@ -1,0 +1,16 @@
+<!-- format with a comment -->
+<p>{{ __('Hello %s', 'informal greeting')|format(name) }}</p>
+<!-- simple with a comment + string concatenation -->
+{% set test = 'you.' %}
+<p>{{ __('It\'s nice to see ' ~ test, 'informal') }}</p>
+<!-- simple without a comment, using a variable instead of a string -->
+{% set test2 = 'How has your day been' %}
+<p>{{ __(test2) }}</p>
+<div>
+	<span>
+		<!-- format without a comment, variable parameter -->
+		<a href="https://google.com">{{ __("Please visit %s")|format(foobar) }}</a>
+		<!-- format without a comment, hard-coded parameter -->
+		<a href="https://google.com">{{ __("another %s")|format('NOT A VARIABLE') }}</a>
+	</span>
+</div>

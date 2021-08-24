@@ -2,6 +2,8 @@
 
 namespace JdsDemoPlugin\Exceptions;
 
-class CommandFailureException extends \Exception {
+use Exception;
+
+class CommandFailureException extends Exception {
 
 }

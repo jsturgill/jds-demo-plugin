@@ -1,14 +1,17 @@
 {
   "autoload": {
-    "psr-4": {
-      "JdsDemoPlugin\\": "src/"
-    }
+	"psr-4": {
+	  "JdsDemoPlugin\\": "src/"
+	}
   },
   "require": {
-    "twig/twig": "^3.0",
-    "php-di/php-di": "^6.3"
+	"twig/twig": "^3.0",
+	"php-di/php-di": "^6.3",
+	"ext-json": "*"
   },
   "require-dev": {
-    "codeception/codeception": "^4.1"
+	"codeception/codeception": "^4.1",
+	"codeception/module-phpbrowser": "^1.0.0",
+	"codeception/module-asserts": "^1.3"
   }
 }
