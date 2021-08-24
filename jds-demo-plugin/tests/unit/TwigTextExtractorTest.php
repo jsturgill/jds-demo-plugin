@@ -2,6 +2,7 @@
 
 namespace JdsDemoPlugin\Tests;
 
+use Exception;
 use JdsDemoPlugin\Services\DependencyContainer;
 use JdsDemoPlugin\Services\TwigTextExtractor;
 use Psr\Container\ContainerInterface;
@@ -20,6 +21,7 @@ class TwigTextExtractorTest extends \Codeception\Test\Unit {
 	const OUTPUT_PATH_PARTIAL = TEST_FILES_ROOT . "/cache/gettext";
 	const __TEST_TEMPLATE = "__-function-template";
 	const _E_TEST_TEMPLATE = '_e-function-template';
+	const _X_TEST_TEMPLATE = '_x-function-template';
 
 	private function getGoldenMasterContents( string $fileName ): string {
 		return file_get_contents( GOLDEN_MASTERS_ROOT . "/TwigTextExtractor/$fileName." . GOLDEN_MASTERS_EXTENSION );
@@ -34,7 +36,7 @@ class TwigTextExtractorTest extends \Codeception\Test\Unit {
 	}
 
 	/**
-	 * @throws \Exception
+	 * @throws Exception
 	 */
 	protected function _before() {
 		$this->di       = DependencyContainer::create( TEST_FILES_ROOT );
@@ -62,7 +64,17 @@ class TwigTextExtractorTest extends \Codeception\Test\Unit {
 		$this->testTemplateAgainstMaster( self::__TEST_TEMPLATE );
 	}
 
+	/**
+	 * @throws SyntaxError
+	 */
 	public function test_eTemplate() {
 		$this->testTemplateAgainstMaster( self::_E_TEST_TEMPLATE );
+	}
+
+	/**
+	 * @throws SyntaxError
+	 */
+	public function test_xTemplate() {
+		$this->testTemplateAgainstMaster( self::_X_TEST_TEMPLATE );
 	}
 }

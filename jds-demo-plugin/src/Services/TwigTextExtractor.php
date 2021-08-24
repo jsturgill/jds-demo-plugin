@@ -7,14 +7,11 @@ use JdsDemoPlugin\Config\TwigTextExtractionConfig;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\TwigTextExtractor\Argument;
-use JdsDemoPlugin\Services\TwigTextExtractor\ArgumentRepresentations;
 use SplFileInfo;
 use Twig\Environment;
 use Twig\Error\SyntaxError;
-use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\FilterExpression;
 use Twig\Node\Expression\FunctionExpression;
-use Twig\Node\Expression\NameExpression;
 use Twig\Node\Node;
 use Twig\Source;
 
@@ -82,6 +79,63 @@ class TwigTextExtractor {
 	}
 
 	/**
+	 * @param Argument[] $translationFuncArgs
+	 * @param string $translationFuncName
+	 * @param int $translationFuncParamsCount do not include the domain parameter, which will always be included
+	 * @param bool $wrapInSprintf
+	 * @param Argument[]|null $sprintfArgs
+	 *
+	 * @return string
+	 * @throws CommandFailureException
+	 * @see TwigTextExtractor::FUNCTIONS_TO_PARAM_COUNT_MAP
+	 */
+	private function codeGenerator(
+		array $translationFuncArgs,
+		string $translationFuncName,
+		int $translationFuncParamsCount = 1,
+		bool $wrapInSprintf = false,
+		?array $sprintfArgs = null
+	): string {
+		if ( $translationFuncParamsCount < 1 ) {
+			throw new \http\Exception\InvalidArgumentException( "Each translation function requires at least 1 argument" );
+		}
+		// 0-based index means the param count is also the index of the optional comment parameter
+		$comment      = array_key_exists( $translationFuncParamsCount, $translationFuncArgs ) ? $translationFuncArgs[ $translationFuncParamsCount ] : null;
+		$cleanComment = null !== $comment
+			? $comment->asComment( self::TRANSLATOR_COMMENT_PREFIX )
+			: null;
+
+		// reduce the arguments array to the expected length by dropping items
+		// from the tail end
+		while ( count( $translationFuncArgs ) > $translationFuncParamsCount ) {
+			array_pop( $translationFuncArgs );
+		}
+
+		// escape, quote, separate with commas, and append the domain
+		$cleanTranslationFuncArgs = join( ", ",
+				array_map( fn( Argument $arg ) => $arg->asPhpCode(), $translationFuncArgs )
+		                            ) . ", \"$this->cleanDomain\"";
+
+		$cleanSprintfArgs = ! is_array( $sprintfArgs )
+			? null
+			: join( ", ",
+				array_map(
+					fn( Argument $arg ) => $arg->asPhpCode(), $sprintfArgs
+				)
+			);
+
+		$prefix = null === $cleanComment
+			? ""
+			: "$cleanComment\n";
+
+		if ( $wrapInSprintf ) {
+			return $prefix .= "sprintf( $translationFuncName( $cleanTranslationFuncArgs ), $cleanSprintfArgs );";
+		}
+
+		return $prefix .= "$translationFuncName( $cleanTranslationFuncArgs );";
+	}
+
+	/**
 	 * Processes a translation function expression in a twig template
 	 *
 	 * This is the simplest case.
@@ -105,46 +159,7 @@ class TwigTextExtractor {
 		);
 	}
 
-	private function codeGenerator(
-		$arguments,
-		$functionName,
-		int $paramCount = 1,
-		$wrapInSprintf = false,
-		$sprintfArgs = null
-	): string {
-		$comment      = array_key_exists( $paramCount, $arguments ) ? $arguments[ $paramCount ] : null;
-		$cleanComment = null !== $comment
-			? $comment->asComment( self::TRANSLATOR_COMMENT_PREFIX )
-			: null;
-		$argumentList = [];
-		$sprintfArgs  = [];
-		// collect all args except the first, up until the limit passed in as $paramCount
-		// -- the first arg counts, so if $paramCount === 1, then no arguments will be
-		// collected
-		foreach ( $arguments as $idx => $argument ) {
-			if ( $idx >= $paramCount ) {
-				array_push( $sprintfArgs, $argument );
-			}
-			array_push( $argumentList, $argument );
-		}
-
-		// escape, quote, separate with commas, and append the domain
-		$cleanArgs = join( ", ",
-				array_map( fn( $arg ) => $arg->asPhpCode(), $argumentList )
-		             ) . ", \"$this->cleanDomain\"";
-
-		$prefix = null === $cleanComment
-			? ""
-			: "$cleanComment\n";
-		if ( $wrapInSprintf ) {
-			return $prefix .= "sprintf( $functionName( $cleanArgs ) );";
-		}
-
-		return $prefix .= "$functionName( $cleanArgs );";
-	}
-
 	/**
-	 * @throws InvalidArgumentException
 	 * @throws Exception
 	 * @link https://www.php.net/manual/en/language.variables.basics.php Source for valid PHP variable regex
 	 */
@@ -177,7 +192,7 @@ class TwigTextExtractor {
 
 		$textValue = $translationArgs[0]->stringValue;
 		//$text[ $textValue ] = "$cleanComment\nsprintf( " . $functionName . "( \"$cleanText\", \"$this->cleanDomain\"), $argString);";
-		$text[ $textValue ] = $this->codeGenerator( $formatArgs,
+		$text[ $textValue ] = $this->codeGenerator( $translationArgs,
 			$functionName,
 			self::FUNCTIONS_TO_PARAM_COUNT_MAP[ $functionName ],
 			true,

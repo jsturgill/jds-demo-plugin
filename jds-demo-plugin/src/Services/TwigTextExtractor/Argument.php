@@ -9,7 +9,8 @@ use Twig\Node\Expression\ConstantExpression;
 use Twig\Node\Expression\NameExpression;
 use Twig\Node\Node;
 
-class Argument {
+class Argument
+{
 
 	public int $representation;
 	public string $stringValue;
@@ -18,11 +19,12 @@ class Argument {
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct( string $stringValue, int $representation ) {
-		ArgumentRepresentations::assertIsValid( $representation );
+	public function __construct(string $stringValue, int $representation)
+	{
+		ArgumentRepresentations::assertIsValid($representation);
 
 		$this->representation = $representation;
-		$this->stringValue    = $stringValue;
+		$this->stringValue = $stringValue;
 	}
 
 	/**
@@ -33,10 +35,11 @@ class Argument {
 	 *
 	 * @return ?string
 	 **/
-	public function asComment( ?string $prefix = null ): string {
-		$intermediate = str_replace( [ "\r", "\n", '?>' ], " ", $this->stringValue );
+	public function asComment(?string $prefix = null): string
+	{
+		$intermediate = str_replace(["\r", "\n", '?>'], " ", $this->stringValue);
 
-		if ( null !== $prefix && ! str_starts_with( $intermediate, $prefix ) ) {
+		if (null !== $prefix && !str_starts_with($intermediate, $prefix)) {
 			$intermediate = $prefix . $intermediate;
 		}
 
@@ -46,55 +49,60 @@ class Argument {
 	/**
 	 * @throws CommandFailureException
 	 */
-	public function asPhpCode(): string {
-		if ( ArgumentRepresentations::STRING === $this->representation ) {
-			return '"' . addslashes( $this->stringValue ) . '"';
+	public function asPhpCode(): string
+	{
+		if (ArgumentRepresentations::STRING === $this->representation) {
+			return '"' . addslashes($this->stringValue) . '"';
 		}
-		if ( ArgumentRepresentations::VARIABLE ) {
+		if (ArgumentRepresentations::VARIABLE) {
 			return '$' . $this->stringValue;
 		}
-		throw new CommandFailureException( "Not implemented" );
+		throw new CommandFailureException("Not implemented");
 	}
 
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public static function ofNode( Node $node ): Argument {
-		$method = 'of' . ( new \ReflectionClass( $node ) )->getShortName();
+	public static function ofNode(Node $node): Argument
+	{
+		$method = 'of' . (new \ReflectionClass($node))->getShortName();
 
-		if ( ! method_exists( __CLASS__, $method ) ) {
-			throw new InvalidArgumentException( "Unknown node type:" . get_class( $node ) );
+		if (!method_exists(__CLASS__, $method)) {
+			throw new InvalidArgumentException("Unknown node type:" . get_class($node));
 		}
 
-		return self::$method( $node );
+		return self::$method($node);
 	}
 
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public static function ofConstantExpression( ConstantExpression $node ): Argument {
-		return new Argument( $node->getAttribute( 'value' ), ArgumentRepresentations::STRING );
+	public static function ofConstantExpression(ConstantExpression $node): Argument
+	{
+		return new Argument($node->getAttribute('value'), ArgumentRepresentations::STRING);
 	}
 
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public static function ofNameExpression( NameExpression $node ): Argument {
-		$name = $node->getAttribute( 'name' );
-		if ( ! preg_match( self::VALID_PHP_VAR_NAME_REGEX, $name ) ) {
-			throw new InvalidArgumentException( "Invalid PHP variable name: '$name'" );
+	public static function ofNameExpression(NameExpression $node): Argument
+	{
+		$name = $node->getAttribute('name');
+		if (!preg_match(self::VALID_PHP_VAR_NAME_REGEX, $name)) {
+			throw new InvalidArgumentException("Invalid PHP variable name: '$name'");
 		}
 
-		return new Argument( $name, ArgumentRepresentations::VARIABLE );
+		return new Argument($name, ArgumentRepresentations::VARIABLE);
 	}
 
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public static function ofConcatBinary( ConcatBinary $node ): Argument {
+	public static function ofConcatBinary(ConcatBinary $node): Argument
+	{
 		// TODO -- fix this
 		$name = 'placeholder';
 
-		return new Argument( $name, ArgumentRepresentations::STRING );
+		return new Argument($name, ArgumentRepresentations::VARIABLE);
 	}
 }
