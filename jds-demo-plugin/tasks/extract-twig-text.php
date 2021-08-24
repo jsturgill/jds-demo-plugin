@@ -6,13 +6,13 @@
 
 namespace JdsDemoPlugin\Cli;
 
-use JdsDemoPlugin\Services\DependencyContainer;
+use JdsDemoPlugin\Services\DependencyContainerFactory;
 use JdsDemoPlugin\Services\TwigTextExtractor;
 
 require_once(dirname(__DIR__) . '/vendor/autoload.php');
 
 
-$di = DependencyContainer::create();
+$di = (new DependencyContainerFactory())->create();
 
 /** @var TwigTextExtractor $twigTextExtractor */
 $twigTextExtractor = $di->get(TwigTextExtractor::class);

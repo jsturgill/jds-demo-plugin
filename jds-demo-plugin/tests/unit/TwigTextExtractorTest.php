@@ -4,7 +4,7 @@ namespace JdsDemoPlugin\Tests;
 
 use Codeception\Test\Unit;
 use Exception;
-use JdsDemoPlugin\Services\DependencyContainer;
+use JdsDemoPlugin\Services\DependencyContainerFactory;
 use JdsDemoPlugin\Services\TwigTextExtractor;
 use Psr\Container\ContainerInterface;
 use SplFileInfo;
@@ -45,7 +45,7 @@ class TwigTextExtractorTest extends Unit
 	 */
 	protected function _before()
 	{
-		$this->di = DependencyContainer::create(TEST_FILES_ROOT, DependencyContainer::ENV_TEST);
+		$this->di = (new DependencyContainerFactory)->create(TEST_FILES_ROOT, DependencyContainerFactory::ENV_TEST);
 		$this->instance = $this->di->get(TwigTextExtractor::class);
 	}
 

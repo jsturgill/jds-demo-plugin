@@ -6,7 +6,7 @@ use DI;
 use Exception;
 use JdsDemoPlugin\Config\ConfigFactory;
 use JdsDemoPlugin\Config\TemplateConfig;
-use JdsDemoPlugin\Config\TwigTextExtractionConfig;
+use JdsDemoPlugin\Config\TwigTextExtractorConfig;
 use JdsDemoPlugin\Plugin;
 use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
 use JdsDemoPlugin\WordPressApi\WordPressMenuFactory;
@@ -16,7 +16,7 @@ use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
 use Twig\TwigFunction;
 
-class DependencyContainer
+class DependencyContainerFactory
 {
 	const ENV_PROD = 'production';
 	const ENV_TEST = 'test';
@@ -26,7 +26,7 @@ class DependencyContainer
 	 * @throws Exception
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	public static function create(?string $rootPluginPath = null, $env = self::ENV_PROD): DI\Container
+	public function create(?string $rootPluginPath = null, $env = self::ENV_PROD): DI\Container
 	{
 		$rootPluginPath = $rootPluginPath ?? dirname((__DIR__), 2);
 
@@ -42,8 +42,9 @@ class DependencyContainer
 
 		$containerBuilder->addDefinitions([
 			'paths.pluginRoot' => $rootPluginPath,
+			'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
 			ConfigFactory::class => function (ContainerInterface $c) {
-				return new ConfigFactory($c->get(FileSystem::class), $c->get('paths.pluginRoot'));
+				return new ConfigFactory($c->get(FileSystem::class), $c->get('paths.pluginRoot'), $c->get('keys.translationDomain'));
 			},
 			TemplateConfig::class => function (ContainerInterface $c) {
 				/** @var ConfigFactory $configFactory */
@@ -51,7 +52,7 @@ class DependencyContainer
 
 				return $configFactory->createTemplateConfig();
 			},
-			TwigTextExtractionConfig::class => function (ContainerInterface $c) {
+			TwigTextExtractorConfig::class => function (ContainerInterface $c) {
 				/** @var ConfigFactory $configFactory */
 				$configFactory = $c->get(ConfigFactory::class);
 
@@ -75,30 +76,21 @@ class DependencyContainer
 				// for comments that are ignored here
 				// -- however, the TwigTextExtractor class recognizes the argument
 				// if it is present
+
 				$twig->addFunction(new TwigFunction('__', function (string $text, ?string $comment = null): string {
 					return __($text, 'jds-demo-plugin-domain');
 				}));
 
 				$twig->addFunction(new TwigFunction('_e', function (string $text, ?string $comment = null): void {
-					if (!function_exists('_e')) {
-						// dummy function -- actually equivalent to WordPress's version
-						function _e($arg, $domain)
-						{
-							echo __($arg);
-						}
-					}
 					_e($text, 'jds-demo-plugin-domain');
 				}));
 
 				$twig->addFunction(new TwigFunction('_x', function (string $text, string $context, $comment = null) {
-					if (!function_exists('_x')) {
-						// dummy function -- not equivalent to WordPress's version
-						function _x($arg, $context, $domain): string
-						{
-							return __($arg);
-						}
-					}
 					_x($text, $context, 'jds-demo-plugin-domain');
+				}));
+
+				$twig->addFunction(new TwigFunction('_n', function (string $single, string $plural, int $number, $comment = null) {
+					_x($single, $plural, $number, 'jds-demo-plugin-domain');
 				}));
 
 				return $twig;

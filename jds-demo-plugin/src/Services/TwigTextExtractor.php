@@ -3,7 +3,7 @@
 namespace JdsDemoPlugin\Services;
 
 use Exception;
-use JdsDemoPlugin\Config\TwigTextExtractionConfig;
+use JdsDemoPlugin\Config\TwigTextExtractorConfig;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\TwigTextExtractor\ArgumentFactory;
@@ -20,37 +20,38 @@ class TwigTextExtractor
 {
 	const TRANSLATOR_COMMENT_PREFIX = 'translators: ';
 
-	private TwigTextExtractionConfig $config;
+	private TwigTextExtractorConfig $config;
 	private Environment $twig;
 	private FileSystem $fileSystem;
 	private ArgumentFactory $argumentFactory;
 	private string $cleanDomain;
 
 
-	// TODO add support for _n, _nx, _n_noop, _nx_noop
+	// TODO add support for _nx, _n_noop, _nx_noop
 	const TRANSLATION_FUNCTIONS = ['__', '_e', '_x'];
 	const FUNCTIONS_TO_PARAM_COUNT_MAP = [
 		'__' => 1,
 		'_e' => 1,
-		'_x' => 2
+		'_x' => 2,
+		'_n' => 3,
 	];
 
 	/**
 	 * @throws Exception
 	 */
-	public function __construct(TwigTextExtractionConfig $config,
-								Environment              $twig,
-								FileSystem               $fileSystem,
-								ArgumentFactory          $argumentFactory)
+	public function __construct(TwigTextExtractorConfig $config,
+								Environment             $twig,
+								FileSystem              $fileSystem,
+								ArgumentFactory         $argumentFactory)
 	{
 		$this->config = $config;
 		$this->twig = $twig;
 		$this->fileSystem = $fileSystem;
 		$this->argumentFactory = $argumentFactory;
-		$this->cleanDomain = addslashes(TwigTextExtractionConfig::DOMAIN);
+		$this->cleanDomain = addslashes($config->domain());
 
-		if ($this->cleanDomain !== TwigTextExtractionConfig::DOMAIN) {
-			throw new Exception("TwigTextExtractionConfig::DOMAIN const is terribly wrong");
+		if ($this->cleanDomain !== $config->domain()) {
+			throw new Exception("domain value is terribly wrong (should resemble a slug): {$config->domain()}");
 		}
 	}
 

@@ -7,6 +7,7 @@ use JdsDemoPlugin\WordPressApi\WordPressMenu;
 
 class Plugin
 {
+	const TRANSLATION_DOMAIN = 'jds-demo-plugin-domain';
 	const TEMPLATE_OPTIONS_MENU = 'jds-demo-plugin-options.twig';
 	private WordPressMenu $optionsMenu;
 

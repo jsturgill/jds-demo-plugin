@@ -21,7 +21,7 @@ namespace JdsDemoPlugin;
 
 
 use Exception;
-use JdsDemoPlugin\Services\DependencyContainer;
+use JdsDemoPlugin\Services\DependencyContainerFactory;
 
 define("JdsDemoPlugin\ROOT_PLUGIN_DIR", plugin_dir_path(__FILE__));
 
@@ -29,7 +29,7 @@ define("JdsDemoPlugin\ROOT_PLUGIN_DIR", plugin_dir_path(__FILE__));
 require ROOT_PLUGIN_DIR . 'vendor/autoload.php';
 
 try {
-	$di = DependencyContainer::create(ROOT_PLUGIN_DIR);
+	$di = (new DependencyContainerFactory)->create(ROOT_PLUGIN_DIR);
 
 	/** @var Plugin $plugin */
 	/** @noinspection PhpUnusedLocalVariableInspection */

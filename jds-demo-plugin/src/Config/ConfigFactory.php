@@ -12,13 +12,15 @@ class ConfigFactory
 	const PATH_PARTIAL_DI_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/di";
 	const PATH_PARTIAL_TWIG_TEXT_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/gettext";
 
-	protected string $pluginRootPath;
+	private string $pluginRootPath;
+	private string $translationDomain;
 
-	public array $cache;
+	private array $cache;
 
-	public function __construct(FileSystem $fileSystem, string $rootPluginPath)
+	public function __construct(FileSystem $fileSystem, string $rootPluginPath, string $translationDomain)
 	{
 		$this->pluginRootPath = $fileSystem->forceTrailingSlash($rootPluginPath);
+		$this->translationDomain = $translationDomain;
 	}
 
 	/**
@@ -51,15 +53,17 @@ class ConfigFactory
 		return $result;
 	}
 
-	public function createTwigTextExtractionConfig(): TwigTextExtractionConfig
+	public function createTwigTextExtractionConfig(): TwigTextExtractorConfig
 	{
-		/** @var TwigTextExtractionConfig $result */
+		/** @var TwigTextExtractorConfig $result */
 		/** @noinspection PhpUnnecessaryLocalVariableInspection */
-		$result = $this->getOrCache(TwigTextExtractionConfig::class,
+		$result = $this->getOrCache(TwigTextExtractorConfig::class,
 			'twigTextExtractionConfig',
-			fn() => new TwigTextExtractionConfig(
+			fn() => new TwigTextExtractorConfig(
 				$this->createTemplateConfig(),
-				$this->pluginRootPath . $this::PATH_PARTIAL_TWIG_TEXT_CACHE)
+				$this->pluginRootPath . $this::PATH_PARTIAL_TWIG_TEXT_CACHE,
+				$this->translationDomain
+			)
 		);
 
 		return $result;
