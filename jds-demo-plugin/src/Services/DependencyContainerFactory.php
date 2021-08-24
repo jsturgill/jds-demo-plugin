@@ -77,20 +77,35 @@ class DependencyContainerFactory
 				// -- however, the TwigTextExtractor class recognizes the argument
 				// if it is present
 
-				$twig->addFunction(new TwigFunction('__', function (string $text, ?string $comment = null): string {
+				$twig->addFunction(new TwigFunction('__', function (string  $text,
+																	?string $comment = null): string {
 					return __($text, 'jds-demo-plugin-domain');
 				}));
 
-				$twig->addFunction(new TwigFunction('_e', function (string $text, ?string $comment = null): void {
+				$twig->addFunction(new TwigFunction('_e', function (string  $text,
+																	?string $comment = null): void {
 					_e($text, 'jds-demo-plugin-domain');
 				}));
 
-				$twig->addFunction(new TwigFunction('_x', function (string $text, string $context, $comment = null) {
+				$twig->addFunction(new TwigFunction('_x', function (string $text,
+																	string $context,
+																		   $comment = null) {
 					_x($text, $context, 'jds-demo-plugin-domain');
 				}));
 
-				$twig->addFunction(new TwigFunction('_n', function (string $single, string $plural, int $number, $comment = null) {
-					_x($single, $plural, $number, 'jds-demo-plugin-domain');
+				$twig->addFunction(new TwigFunction('_n', function (string $single,
+																	string $plural,
+																	int    $number,
+																		   $comment = null) {
+					_n($single, $plural, $number, 'jds-demo-plugin-domain');
+				}));
+
+				$twig->addFunction(new TwigFunction('_nx', function (string $single,
+																	 string $plural,
+																	 int    $number,
+																			$context,
+																			$comment = null) {
+					_nx($single, $plural, $number, $context, 'jds-demo-plugin-domain');
 				}));
 
 				return $twig;
