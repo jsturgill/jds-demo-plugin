@@ -64,7 +64,7 @@ class FileSystem {
 	private function toAbsoluteSafePath( string $path ): string {
 		$realPath = realpath( $path );
 		if ( mb_substr( $realPath, 0, $this->rootLength ) !== $this->root ) {
-			throw new InvalidArgumentException( "The FileSystem class can only operate within an allowed root directory. Allowed root path: '{$this->root}'. Attempted target path: '$realPath'" );
+			throw new InvalidArgumentException( "The FileSystem class can only operate within an allowed root directory. Allowed root path: '$this->root'. Attempted target path: '$realPath'" );
 		}
 
 		return $realPath;

@@ -23,16 +23,17 @@ namespace JdsDemoPlugin;
 use Exception;
 use JdsDemoPlugin\Services\DependencyContainer;
 
-define( "JdsDemoPlugin\ROOT_PLUGIN_DIR", plugin_dir_path( __FILE__ ) );
+define("JdsDemoPlugin\ROOT_PLUGIN_DIR", plugin_dir_path(__FILE__));
 
 /** @noinspection PhpIncludeInspection */
 require ROOT_PLUGIN_DIR . 'vendor/autoload.php';
 
 try {
-	$di = DependencyContainer::create( ROOT_PLUGIN_DIR );
+	$di = DependencyContainer::create(ROOT_PLUGIN_DIR);
 
 	/** @var Plugin $plugin */
-	$plugin = $di->get( Plugin::class );
-} catch ( Exception $e ) {
-	error_log( "jds-demo-plugin failed to initialize: {$e->getMessage()}" );
+	/** @noinspection PhpUnusedLocalVariableInspection */
+	$plugin = $di->get(Plugin::class);
+} catch (Exception $e) {
+	error_log("jds-demo-plugin failed to initialize: {$e->getMessage()}");
 }

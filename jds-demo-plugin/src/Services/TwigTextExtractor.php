@@ -6,10 +6,8 @@ use Exception;
 use JdsDemoPlugin\Config\TwigTextExtractionConfig;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
-use JdsDemoPlugin\Services\TwigTextExtractor\Argument;
 use JdsDemoPlugin\Services\TwigTextExtractor\ArgumentFactory;
 use JdsDemoPlugin\Services\TwigTextExtractor\IArgument;
-use PhpParser\Node\Arg;
 use SplFileInfo;
 use Twig\Environment;
 use Twig\Error\SyntaxError;
@@ -142,10 +140,10 @@ class TwigTextExtractor
 			: "$cleanComment\n";
 
 		if ($wrapInSprintf) {
-			return $prefix .= "sprintf( $translationFuncName( $cleanTranslationFuncArgs ), $cleanSprintfArgs );";
+			return $prefix . "sprintf( $translationFuncName( $cleanTranslationFuncArgs ), $cleanSprintfArgs );";
 		}
 
-		return $prefix .= "$translationFuncName( $cleanTranslationFuncArgs );";
+		return $prefix . "$translationFuncName( $cleanTranslationFuncArgs );";
 	}
 
 	/**
@@ -157,19 +155,23 @@ class TwigTextExtractor
 	 */
 	private function processFunctionExpression(FunctionExpression $node, array &$text)
 	{
-		$name = $node->getAttribute('name');
-		if (!in_array($name, self::TRANSLATION_FUNCTIONS)) {
+		$functionName = $node->getAttribute('name');
+
+		if (!array_key_exists($functionName, self::FUNCTIONS_TO_PARAM_COUNT_MAP)) {
 			return;
 		}
-		$arguments = $this->extractArguments($node);
+
+		$arguments = $this->extractArguments($node, self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName]);
 		$textValue = $arguments[0]->asPhpCode();
+
 		// don't overwrite the value if it already exists
 		if (array_key_exists($textValue, $text)) {
 			return;
 		}
+
 		$text[$textValue] = $this->codeGenerator($arguments,
-			$name,
-			self::FUNCTIONS_TO_PARAM_COUNT_MAP[$name]
+			$functionName,
+			self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName]
 		);
 	}
 
@@ -198,14 +200,11 @@ class TwigTextExtractor
 			return;
 		}
 
-		$translationArgs = $this->extractArguments($filteredNode);
+		$translationArgs = $this->extractArguments($filteredNode, self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName]);
 
 		$formatArgs = $this->extractArguments($node);
 
-		$argString = join(', ', array_map(fn(IArgument $x) => $x->asPhpCode(), $formatArgs));
-
 		$textValue = $translationArgs[0]->asPhpCode();
-		//$text[ $textValue ] = "$cleanComment\nsprintf( " . $functionName . "( \"$cleanText\", \"$this->cleanDomain\"), $argString);";
 		$text[$textValue] = $this->codeGenerator($translationArgs,
 			$functionName,
 			self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName],
@@ -227,7 +226,7 @@ class TwigTextExtractor
 
 		// simple strings
 		if ($node instanceof FunctionExpression) {
-			$this->processFunctionExpression($node, $text);;
+			$this->processFunctionExpression($node, $text);
 		}
 		// todo pluralization?
 		foreach ($node->getIterator() as $childNode) {

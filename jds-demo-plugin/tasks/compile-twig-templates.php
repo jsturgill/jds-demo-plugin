@@ -9,7 +9,6 @@ namespace JdsDemoPlugin\Cli;
 use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Services\DependencyContainer;
 use JdsDemoPlugin\Services\FileSystem;
-use SplFileInfo;
 use Twig\Environment;
 
 require_once( dirname( __DIR__ ) . '/vendor/autoload.php' );

@@ -20,11 +20,11 @@ class DependencyContainer
 {
 	const ENV_PROD = 'production';
 	const ENV_TEST = 'test';
-	const ENV_DEV = 'dev';
 
 	/**
 	 * Create a DI container
 	 * @throws Exception
+	 * @noinspection PhpUnusedParameterInspection
 	 */
 	public static function create(?string $rootPluginPath = null, $env = self::ENV_PROD): DI\Container
 	{
@@ -81,8 +81,8 @@ class DependencyContainer
 
 				$twig->addFunction(new TwigFunction('_e', function (string $text, ?string $comment = null): void {
 					if (!function_exists('_e')) {
-						// dummy function -- actually equivalent to WP's version
-						function _e($arg)
+						// dummy function -- actually equivalent to WordPress's version
+						function _e($arg, $domain)
 						{
 							echo __($arg);
 						}
@@ -92,8 +92,8 @@ class DependencyContainer
 
 				$twig->addFunction(new TwigFunction('_x', function (string $text, string $context, $comment = null) {
 					if (!function_exists('_x')) {
-						// dummy function -- not equivalent to WP's version
-						function _x($arg): string
+						// dummy function -- not equivalent to WordPress's version
+						function _x($arg, $context, $domain): string
 						{
 							return __($arg);
 						}
