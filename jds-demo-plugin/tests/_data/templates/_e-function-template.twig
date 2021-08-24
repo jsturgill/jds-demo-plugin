@@ -1,9 +1,11 @@
 <!-- format with a comment -->
 <p>{{ _e('Hello %s', 'informal greeting')|format(name) }}</p>
-<!-- simple with a comment -->
-<p>{{ _e('It\'s nice to see you.', 'informal') }}</p>
-<!-- simple without a comment -->
-<p>{{ _e('How has your day been?') }}</p>
+<!-- simple with a comment + string concatenation -->
+{% set test = 'you.' %}
+<p>{{ _e('It\'s nice to see ' ~ test, 'informal') }}</p>
+<!-- simple without a comment, using a variable instead of a string -->
+{% set test2 = 'How has your day been' %}
+<p>{{ _e(test2) }}</p>
 <div>
 	<span>
 		<!-- format without a comment, variable parameter -->

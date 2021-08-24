@@ -1,9 +1,11 @@
 <!-- format with a comment -->
 <p>{{ __('Hello %s', 'informal greeting')|format(name) }}</p>
-<!-- simple with a comment -->
-<p>{{ __('It\'s nice to see you.', 'informal') }}</p>
-<!-- simple without a comment -->
-<p>{{ __('How has your day been?') }}</p>
+<!-- simple with a comment + string concatenation -->
+{% set test = 'you.' %}
+<p>{{ __('It\'s nice to see ' ~ test, 'informal') }}</p>
+<!-- simple without a comment, using a variable instead of a string -->
+{% set test2 = 'How has your day been' %}
+<p>{{ __(test2) }}</p>
 <div>
 	<span>
 		<!-- format without a comment, variable parameter -->
