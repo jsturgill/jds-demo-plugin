@@ -9,22 +9,24 @@ class ConcatBinaryArgument extends AbstractArgument implements IArgument
 {
 
 	private ConcatBinary $node;
+	private IArgument $left;
+	private IArgument $right;
 
 	public function __construct(ConcatBinary $node, ArgumentFactory $argumentFactory)
 	{
+		$this->left = $argumentFactory->ofNode($node->getNode('left'));
+		$this->right = $argumentFactory->ofNode($node->getNode('right'));
 		$this->node = $node;
 	}
 
-	public function asComment(?string $prefix = null): string
+	public function asSingleLineComment(?string $prefix = null): string
 	{
-		return $this->stringToComment('placeholder comment', $prefix);
+		$right = ltrim($this->right->asSingleLineComment(), '/');
+		return $this->stringToComment($this->left->asSingleLineComment() . $right, $prefix);
 	}
 
-	/**
-	 * @throws InvalidArgumentException
-	 */
 	public function asPhpCode(): string
 	{
-		return $this->stringToVariable('placeholderVarName');
+		return $this->left->asPhpCode() . ' . ' . $this->right->asPhpCode();
 	}
 }

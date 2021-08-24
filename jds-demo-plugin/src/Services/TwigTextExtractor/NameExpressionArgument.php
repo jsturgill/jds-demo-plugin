@@ -24,7 +24,7 @@ class NameExpressionArgument extends AbstractArgument implements IArgument
 	/**
 	 * @throws InvalidArgumentException
 	 */
-	public function asComment(?string $prefix = null): string
+	public function asSingleLineComment(?string $prefix = null): string
 	{
 		return $this->stringToComment($this->asPhpCode(), $prefix);
 	}

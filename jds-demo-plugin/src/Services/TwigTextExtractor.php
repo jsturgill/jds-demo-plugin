@@ -115,7 +115,7 @@ class TwigTextExtractor
 		// 0-based index means the param count is also the index of the optional comment parameter
 		$comment = array_key_exists($translationFuncParamsCount, $translationFuncArgs) ? $translationFuncArgs[$translationFuncParamsCount] : null;
 		$cleanComment = null !== $comment
-			? $comment->asComment(self::TRANSLATOR_COMMENT_PREFIX)
+			? $comment->asSingleLineComment(self::TRANSLATOR_COMMENT_PREFIX)
 			: null;
 
 		// reduce the arguments array to the expected length by dropping items

@@ -21,7 +21,7 @@ interface IArgument
 	 *
 	 * @return ?string
 	 **/
-	public function asComment(?string $prefix = null): string;
+	public function asSingleLineComment(?string $prefix = null): string;
 
 	/**
 	 * @throws CommandFailureException

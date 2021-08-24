@@ -14,7 +14,7 @@ class ConstantExpressionArgument extends AbstractArgument implements IArgument
 		$this->value = $node->getAttribute('value');
 	}
 
-	public function asComment(?string $prefix = null): string
+	public function asSingleLineComment(?string $prefix = null): string
 	{
 		return $this->stringToComment($this->value, $prefix);
 	}
