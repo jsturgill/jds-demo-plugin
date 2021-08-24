@@ -34,6 +34,7 @@ class TwigTextExtractor
 		'_x' => 2,
 		'_n' => 3,
 		'_nx' => 4,
+		'_n_noop' => 2,
 	];
 
 	/**

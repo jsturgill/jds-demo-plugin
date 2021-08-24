@@ -87,24 +87,30 @@ class DependencyContainerFactory
 					_e($text, 'jds-demo-plugin-domain');
 				}));
 
-				$twig->addFunction(new TwigFunction('_x', function (string $text,
-																	string $context,
-																		   $comment = null) {
+				$twig->addFunction(new TwigFunction('_x', function (string  $text,
+																	string  $context,
+																	?string $comment = null) {
 					_x($text, $context, 'jds-demo-plugin-domain');
 				}));
 
-				$twig->addFunction(new TwigFunction('_n', function (string $single,
-																	string $plural,
-																	int    $number,
-																		   $comment = null) {
+				$twig->addFunction(new TwigFunction('_n', function (string  $single,
+																	string  $plural,
+																	int     $number,
+																	?string $comment = null) {
 					_n($single, $plural, $number, 'jds-demo-plugin-domain');
 				}));
 
-				$twig->addFunction(new TwigFunction('_nx', function (string $single,
-																	 string $plural,
-																	 int    $number,
-																			$context,
-																			$comment = null) {
+				$twig->addFunction(new TwigFunction('_n_noop', function (string  $single,
+																		 string  $plural,
+																		 ?string $comment = null) {
+					_n_noop($single, $plural, 'jds-demo-plugin-domain');
+				}));
+
+				$twig->addFunction(new TwigFunction('_nx', function (string  $single,
+																	 string  $plural,
+																	 int     $number,
+																	 string  $context,
+																	 ?string $comment = null) {
 					_nx($single, $plural, $number, $context, 'jds-demo-plugin-domain');
 				}));
 
