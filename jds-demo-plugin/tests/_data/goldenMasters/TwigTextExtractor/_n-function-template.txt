@@ -6,8 +6,8 @@ sprintf( _n( "There is one dog", "There are %d dogs", 123.7, "jds-demo-plugin-do
 // translators: the number of things
 sprintf( _n( "There is one thing", "There are %d things", 4.3E-8, "jds-demo-plugin-domain" ), $things );
 // translators: the number of lizards
-sprintf( _n( "There is one lizard", "There are %d lizards", 5, "jds-demo-plugin-domain" ), $lizards );
+_n( "There is one lizard", "There are %d lizards", 5, "jds-demo-plugin-domain" );
 // translators: the number of frogs
-sprintf( _n( "There is one frog", "There are %d frogs", 123.7, "jds-demo-plugin-domain" ), $frogs );
+_n( "There is one frog", "There are %d frogs", 123.7, "jds-demo-plugin-domain" );
 // translators: the number of bagels
-sprintf( _n( "There is one bagel", "There are %d bagels", 4.3E-8, "jds-demo-plugin-domain" ), $bagels );
+_n( "There is one bagel", "There are %d bagels", 4.3E-8, "jds-demo-plugin-domain" );
