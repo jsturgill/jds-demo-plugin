@@ -27,7 +27,7 @@ class TwigTextExtractor
 	private string $cleanDomain;
 
 
-	// TODO add support for _n_noop, _nx_noop
+	// TODO add support for
 	const FUNCTIONS_TO_PARAM_COUNT_MAP = [
 		'__' => 1,
 		'_e' => 1,
@@ -35,6 +35,7 @@ class TwigTextExtractor
 		'_n' => 3,
 		'_nx' => 4,
 		'_n_noop' => 2,
+		'_nx_noop' => 3
 	];
 
 	/**

@@ -114,6 +114,13 @@ class DependencyContainerFactory
 					_nx($single, $plural, $number, $context, 'jds-demo-plugin-domain');
 				}));
 
+				$twig->addFunction(new TwigFunction('_nx_noop', function (string  $single,
+																		  string  $plural,
+																		  string  $context,
+																		  ?string $comment = null) {
+					_nx($single, $plural, $context, 'jds-demo-plugin-domain');
+				}));
+
 				return $twig;
 			},
 			TwigTextExtractor::class => DI\autowire(TwigTextExtractor::class),
