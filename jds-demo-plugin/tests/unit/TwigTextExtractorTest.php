@@ -21,10 +21,7 @@ class TwigTextExtractorTest extends Unit
 
 	const TEMPLATES_PATH_PARTIAL = TEST_FILES_ROOT . "/templates";
 	const OUTPUT_PATH_PARTIAL = TEST_FILES_ROOT . "/cache/gettext";
-	const __TEST_TEMPLATE = "__-function-template";
-	const _E_TEST_TEMPLATE = '_e-function-template';
-	const _X_TEST_TEMPLATE = '_x-function-template';
-	const _N_TEST_TEMPLATE = '_n-function-template';
+	const TEMPLATE_SUFFIX = '-function-template';
 
 	private function getGoldenMasterContents(string $fileName): string
 	{
@@ -71,7 +68,7 @@ class TwigTextExtractorTest extends Unit
 	 */
 	public function test__Template()
 	{
-		$this->testTemplateAgainstMaster(self::__TEST_TEMPLATE);
+		$this->testTemplateAgainstMaster('__' . self::TEMPLATE_SUFFIX);
 	}
 
 	/**
@@ -79,7 +76,7 @@ class TwigTextExtractorTest extends Unit
 	 */
 	public function test_eTemplate()
 	{
-		$this->testTemplateAgainstMaster(self::_E_TEST_TEMPLATE);
+		$this->testTemplateAgainstMaster('_e' . self::TEMPLATE_SUFFIX);
 	}
 
 	/**
@@ -87,7 +84,7 @@ class TwigTextExtractorTest extends Unit
 	 */
 	public function test_xTemplate()
 	{
-		$this->testTemplateAgainstMaster(self::_X_TEST_TEMPLATE);
+		$this->testTemplateAgainstMaster('_x' . self::TEMPLATE_SUFFIX);
 	}
 
 	/**
@@ -95,6 +92,14 @@ class TwigTextExtractorTest extends Unit
 	 */
 	public function test_nTemplate()
 	{
-		$this->testTemplateAgainstMaster(self::_N_TEST_TEMPLATE);
+		$this->testTemplateAgainstMaster('_n' . self::TEMPLATE_SUFFIX);
+	}
+
+	/**
+	 * @throws SyntaxError
+	 */
+	public function test_nxTemplate()
+	{
+		$this->testTemplateAgainstMaster('_nx' . self::TEMPLATE_SUFFIX);
 	}
 }
