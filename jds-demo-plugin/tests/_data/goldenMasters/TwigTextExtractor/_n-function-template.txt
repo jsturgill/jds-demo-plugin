@@ -1,0 +1,13 @@
+<?php
+// translators: the number of cats
+sprintf( _n( "There is one cat", "There are %d cats", 5, "jds-demo-plugin-domain" ), $cats );
+// translators: the number of dogs
+sprintf( _n( "There is one dog", "There are %d dogs", 123.7, "jds-demo-plugin-domain" ), $dogs );
+// translators: the number of things
+sprintf( _n( "There is one thing", "There are %d things", 4.3E-8, "jds-demo-plugin-domain" ), $things );
+// translators: the number of lizards
+sprintf( _n( "There is one lizard", "There are %d lizards", 5, "jds-demo-plugin-domain" ), $lizards );
+// translators: the number of frogs
+sprintf( _n( "There is one frog", "There are %d frogs", 123.7, "jds-demo-plugin-domain" ), $frogs );
+// translators: the number of bagels
+sprintf( _n( "There is one bagel", "There are %d bagels", 4.3E-8, "jds-demo-plugin-domain" ), $bagels );

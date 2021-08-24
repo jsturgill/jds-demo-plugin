@@ -24,6 +24,7 @@ class TwigTextExtractorTest extends Unit
 	const __TEST_TEMPLATE = "__-function-template";
 	const _E_TEST_TEMPLATE = '_e-function-template';
 	const _X_TEST_TEMPLATE = '_x-function-template';
+	const _N_TEST_TEMPLATE = '_n-function-template';
 
 	private function getGoldenMasterContents(string $fileName): string
 	{
@@ -87,5 +88,13 @@ class TwigTextExtractorTest extends Unit
 	public function test_xTemplate()
 	{
 		$this->testTemplateAgainstMaster(self::_X_TEST_TEMPLATE);
+	}
+
+	/**
+	 * @throws SyntaxError
+	 */
+	public function test_nTemplate()
+	{
+		$this->testTemplateAgainstMaster(self::_N_TEST_TEMPLATE);
 	}
 }
