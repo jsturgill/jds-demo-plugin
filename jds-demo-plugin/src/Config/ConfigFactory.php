@@ -15,6 +15,9 @@ class ConfigFactory
 	private string $pluginRootPath;
 	private string $translationDomain;
 
+	/**
+	 * @var array<string, object>
+	 */
 	private array $cache;
 
 	public function __construct(FileSystem $fileSystem, string $rootPluginPath, string $translationDomain)
@@ -24,12 +27,12 @@ class ConfigFactory
 	}
 
 	/**
+	 * @template T of Object
 	 * @param class-string<T> $className
 	 * @param string $key
 	 * @param callable $callback
 	 *
 	 * @return T
-	 * @noinspection PhpUndefinedClassInspection
 	 */
 	private function getOrCache(string $className, string $key, callable $callback): object
 	{

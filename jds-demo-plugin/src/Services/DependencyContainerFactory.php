@@ -26,7 +26,7 @@ class DependencyContainerFactory
 	 * @throws Exception
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	public function create(?string $rootPluginPath = null, $env = self::ENV_PROD): DI\Container
+	public function create(?string $rootPluginPath = null, string $env = self::ENV_PROD): DI\Container
 	{
 		$rootPluginPath = $rootPluginPath ?? dirname((__DIR__), 2);
 
@@ -124,7 +124,7 @@ class DependencyContainerFactory
 																		  string  $plural,
 																		  string  $context,
 																		  ?string $comment = null) {
-					_nx($single, $plural, $context, 'jds-demo-plugin-domain');
+					_nx_noop($single, $plural, $context, 'jds-demo-plugin-domain');
 				}));
 
 				// the following translation functions are not used by the TwigTextExtractor

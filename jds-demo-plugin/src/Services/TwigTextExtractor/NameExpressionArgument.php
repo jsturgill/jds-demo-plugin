@@ -4,6 +4,7 @@ namespace JdsDemoPlugin\Services\TwigTextExtractor;
 
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use Twig\Node\Expression\NameExpression;
+use Twig\Node\Node;
 
 class NameExpressionArgument extends AbstractArgument implements IArgument
 {
