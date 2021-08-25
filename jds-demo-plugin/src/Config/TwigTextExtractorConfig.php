@@ -28,7 +28,7 @@ class TwigTextExtractorConfig
 	public function toOutputFilePath(string $relativeTemplatePath): string
 	{
 		$pathinfo = pathinfo($relativeTemplatePath);
-		if (mb_strtolower($pathinfo['extension']) !== 'twig') {
+		if (array_key_exists('extension', $pathinfo) && mb_strtolower($pathinfo['extension']) !== 'twig') {
 			throw new InvalidArgumentException("Expected a .twig extension: $relativeTemplatePath");
 		}
 

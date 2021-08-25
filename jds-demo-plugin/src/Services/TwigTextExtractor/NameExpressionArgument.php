@@ -15,7 +15,7 @@ class NameExpressionArgument extends AbstractArgument implements IArgument
 	 */
 	public function __construct(NameExpression $node)
 	{
-		$this->value = $node->getAttribute('name');
+		$this->value = (string)$node->getAttribute('name');
 		if (!preg_match(AbstractArgument::VALID_PHP_VAR_NAME_REGEX, $this->value)) {
 			throw new InvalidArgumentException("Invalid PHP variable name: '$this->value'");
 		}

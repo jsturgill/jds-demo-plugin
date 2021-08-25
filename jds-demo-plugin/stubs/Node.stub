@@ -1,0 +1,11 @@
+<?php
+namespace Twig\Node\Expression;
+namespace Twig\Node;
+
+class Node {
+
+	/** @return \Traversable<int, Node> */
+	public function getIterator(): \Traversable
+	{
+	}
+}

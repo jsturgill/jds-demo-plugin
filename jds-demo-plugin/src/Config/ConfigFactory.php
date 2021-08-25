@@ -15,7 +15,10 @@ class ConfigFactory
 	private string $pluginRootPath;
 	private string $translationDomain;
 
-	private array $cache;
+	/**
+	 * @var array<string, mixed>
+	 */
+	private array $cache = [];
 
 	public function __construct(FileSystem $fileSystem, string $rootPluginPath, string $translationDomain)
 	{
@@ -24,18 +27,24 @@ class ConfigFactory
 	}
 
 	/**
+	 *
+	 * @psalm-suppress UnusedParam
+	 * @template T of object
 	 * @param class-string<T> $className
 	 * @param string $key
-	 * @param callable $callback
+	 * @param callable():T $callback
 	 *
 	 * @return T
-	 * @noinspection PhpUndefinedClassInspection
 	 */
 	private function getOrCache(string $className, string $key, callable $callback): object
 	{
-		// TODO configure PHPStan / Psalm, try to get generics working
-		$this->cache[$key] = $this->cache[$key] ?? $callback();
 
+		if (!array_key_exists($key, $this->cache)) {
+			$instance = $callback();
+			$this->cache[$key] = $instance;
+		}
+
+		/** @var T */
 		return $this->cache[$key];
 	}
 
@@ -46,8 +55,8 @@ class ConfigFactory
 		$result = $this->getOrCache(TemplateConfig::class,
 			'templateConfig',
 			fn() => new TemplateConfig(
-				$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATES,
-				$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATE_CACHE
+				$this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TEMPLATES,
+				$this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TEMPLATE_CACHE
 			));
 
 		return $result;
@@ -61,7 +70,7 @@ class ConfigFactory
 			'twigTextExtractionConfig',
 			fn() => new TwigTextExtractorConfig(
 				$this->createTemplateConfig(),
-				$this->pluginRootPath . $this::PATH_PARTIAL_TWIG_TEXT_CACHE,
+				$this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TWIG_TEXT_CACHE,
 				$this->translationDomain
 			)
 		);

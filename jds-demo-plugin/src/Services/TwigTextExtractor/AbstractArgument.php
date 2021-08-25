@@ -17,8 +17,10 @@ abstract class AbstractArgument implements IArgument
 	 * Ensures the string starts with the necessary translators prefix,
 	 * and adds `// ` to the start.
 	 *
-	 * @return ?string
-	 **/
+	 * @param string $value
+	 * @param string|null $prefix
+	 * @return string
+	 */
 	protected function stringToComment(string $value, ?string $prefix = null): string
 	{
 		$intermediate = str_replace(["\r", "\n", '?>'], " ", $value);

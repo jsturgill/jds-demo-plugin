@@ -22,11 +22,12 @@ class DependencyContainerFactory
 	const ENV_TEST = 'test';
 
 	/**
+	 * @psalm-suppress UnusedClosureParam
 	 * Create a DI container
 	 * @throws Exception
 	 * @noinspection PhpUnusedParameterInspection
 	 */
-	public function create(?string $rootPluginPath = null, $env = self::ENV_PROD): DI\Container
+	public function create(?string $rootPluginPath = null, string $env = self::ENV_PROD): DI\Container
 	{
 		$rootPluginPath = $rootPluginPath ?? dirname((__DIR__), 2);
 
@@ -44,7 +45,9 @@ class DependencyContainerFactory
 			'paths.pluginRoot' => $rootPluginPath,
 			'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
 			ConfigFactory::class => function (ContainerInterface $c) {
-				return new ConfigFactory($c->get(FileSystem::class), $c->get('paths.pluginRoot'), $c->get('keys.translationDomain'));
+				/** @var FileSystem $fileSystem */
+				$fileSystem = $c->get(FileSystem::class);
+				return new ConfigFactory($fileSystem, (string)$c->get('paths.pluginRoot'), (string)$c->get('keys.translationDomain'));
 			},
 			TemplateConfig::class => function (ContainerInterface $c) {
 				/** @var ConfigFactory $configFactory */
@@ -68,7 +71,9 @@ class DependencyContainerFactory
 				/** @var TemplateConfig $templateConfig */
 				$templateConfig = $c->get(TemplateConfig::class);
 
-				$twig = new Environment($c->get(LoaderInterface::class), [
+				/** @var LoaderInterface $loader */
+				$loader = $c->get(LoaderInterface::class);
+				$twig = new Environment($loader, [
 					'cache' => $templateConfig->templateCachePath
 				]);
 
@@ -124,7 +129,7 @@ class DependencyContainerFactory
 																		  string  $plural,
 																		  string  $context,
 																		  ?string $comment = null) {
-					_nx($single, $plural, $context, 'jds-demo-plugin-domain');
+					_nx_noop($single, $plural, $context, 'jds-demo-plugin-domain');
 				}));
 
 				// the following translation functions are not used by the TwigTextExtractor

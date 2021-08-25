@@ -14,15 +14,20 @@ class ConstantExpressionArgument extends AbstractArgument implements IArgument
 
 	public function __construct(ConstantExpression $node)
 	{
-		$this->value = $node->getAttribute('value');
+		/** @var string|int|float $value */
+		$value = $node->getAttribute('value');
+		$this->value = $value;
 	}
 
 	public function asSingleLineComment(?string $prefix = null): string
 	{
-		return $this->stringToComment($this->value, $prefix);
+		return $this->stringToComment((string)$this->value, $prefix);
 	}
 
-	public function asPhpCode(): string
+	/**
+	 * @return float|int|string
+	 */
+	public function asPhpCode()
 	{
 		if (is_int($this->value) || is_float($this->value)) {
 			return $this->value;

@@ -72,7 +72,7 @@ class TwigTextExtractor
 	 * @return IArgument[]
 	 * @throws Exception
 	 */
-	private function extractArguments(Node $node, $min = 1): array
+	private function extractArguments(Node $node, int $min = 1): array
 	{
 		if (!$node->hasNode('arguments')) {
 			throw new InvalidArgumentException("Cannot extract arguments from a node that does not have any");
@@ -80,6 +80,7 @@ class TwigTextExtractor
 
 		$result = [];
 
+		/** @var Node $argument */
 		foreach ($node->getNode('arguments')->getIterator() as $argument) {
 			array_push($result, $this->argumentFactory->ofNode($argument));
 		}
@@ -99,7 +100,7 @@ class TwigTextExtractor
 	 * @param IArgument[]|null $sprintfArgs
 	 *
 	 * @return string
-	 * @throws CommandFailureException
+	 * @throws CommandFailureException|InvalidArgumentException
 	 * @see TwigTextExtractor::FUNCTIONS_TO_PARAM_COUNT_MAP
 	 */
 	private function codeGenerator(
@@ -111,7 +112,7 @@ class TwigTextExtractor
 	): string
 	{
 		if ($translationFuncParamsCount < 1) {
-			throw new \http\Exception\InvalidArgumentException("Each translation function requires at least 1 argument");
+			throw new InvalidArgumentException("Each translation function requires at least 1 argument");
 		}
 		// 0-based index means the param count is also the index of the optional comment parameter
 		$comment = array_key_exists($translationFuncParamsCount, $translationFuncArgs) ? $translationFuncArgs[$translationFuncParamsCount] : null;
@@ -153,19 +154,22 @@ class TwigTextExtractor
 	 * Processes a translation function expression in a twig template
 	 *
 	 * This is the simplest case.
+	 * @param FunctionExpression $node
+	 * @param array<string,string> $text
+	 * @throws CommandFailureException
 	 * @throws Exception
 	 * @see TwigTextExtractor::processFilterExpression the more complex "sprintf" style case
 	 */
-	private function processFunctionExpression(FunctionExpression $node, array &$text)
+	private function processFunctionExpression(FunctionExpression $node, array &$text): void
 	{
-		$functionName = $node->getAttribute('name');
+		$functionName = (string)$node->getAttribute('name');
 
 		if (!array_key_exists($functionName, self::FUNCTIONS_TO_PARAM_COUNT_MAP)) {
 			return;
 		}
 
 		$arguments = $this->extractArguments($node, self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName]);
-		$textValue = $arguments[0]->asPhpCode();
+		$textValue = (string)$arguments[0]->asPhpCode();
 
 		// don't overwrite the value if it already exists
 		if (array_key_exists($textValue, $text)) {
@@ -179,9 +183,12 @@ class TwigTextExtractor
 	}
 
 	/**
+	 * @param FilterExpression $node
+	 * @param array<string,string> $text
+	 * @throws CommandFailureException|InvalidArgumentException
 	 * @throws Exception
 	 */
-	private function processFilterExpression(FilterExpression $node, array &$text)
+	private function processFilterExpression(FilterExpression $node, array &$text): void
 	{
 		// the filtered node should be a function expression where the
 		// function name is one of the supported translation functions
@@ -191,7 +198,7 @@ class TwigTextExtractor
 			return;
 		}
 
-		$functionName = $filteredNode->getAttribute('name');
+		$functionName = (string)$filteredNode->getAttribute('name');
 
 		if (!array_key_exists($functionName, self::FUNCTIONS_TO_PARAM_COUNT_MAP)) {
 			return;
@@ -208,7 +215,7 @@ class TwigTextExtractor
 		$formatArgs = $this->extractArguments($node);
 
 		$textValue = $translationArgs[0]->asPhpCode();
-		$text[$textValue] = $this->codeGenerator($translationArgs,
+		$text[(string)$textValue] = $this->codeGenerator($translationArgs,
 			$functionName,
 			self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName],
 			true,
@@ -218,9 +225,12 @@ class TwigTextExtractor
 
 	/**
 	 * Visits each node in and extracts translated strings
+	 * @param Node $node
+	 * @param array<string,string> $text
+	 * @throws CommandFailureException
 	 * @throws Exception
 	 */
-	private function processNode(Node $node, array &$text)
+	private function processNode(Node $node, array &$text): void
 	{
 		// sprintf format
 		if ($node instanceof FilterExpression) {
@@ -231,7 +241,8 @@ class TwigTextExtractor
 		if ($node instanceof FunctionExpression) {
 			$this->processFunctionExpression($node, $text);
 		}
-		// todo pluralization?
+
+		/** @var Node $childNode */
 		foreach ($node->getIterator() as $childNode) {
 			$this->processNode($childNode, $text);
 		}
@@ -243,20 +254,28 @@ class TwigTextExtractor
 	 */
 	public function processTwigTemplate(SplFileInfo $fileInfo): void
 	{
-		if ('twig' !== $fileInfo->getExtension()) {
+		if ('twig' !== $fileInfo->getExtension() || false === $fileInfo->getRealPath()) {
+			return;
+		}
+
+		$fileContents = file_get_contents($fileInfo->getRealPath());
+
+		if (false === $fileContents) {
 			return;
 		}
 
 		// add one to input path to account for trailing slash
 		$relativePath = mb_substr($fileInfo->getRealPath(), $this->config->inputPathLength + 1);
+
 		$stream = $this->twig->tokenize(
-			new Source(file_get_contents($fileInfo->getRealPath()),
+			new Source($fileContents,
 				$relativePath,
 				$fileInfo->getRealPath())
 		);
 		$nodes = $this->twig->parse($stream);
 		$text = [];
 
+		/** @var Node $node */
 		foreach ($nodes->getIterator() as $node) {
 			$this->processNode($node, $text);
 		}

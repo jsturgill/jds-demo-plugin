@@ -20,7 +20,7 @@ class Plugin
 			__("JDS Demo Plugin", "jds-demo-plugin-domain"),
 			"manage_options",
 			"jds-demo-plugin-options",
-			$this::TEMPLATE_OPTIONS_MENU,
+			Plugin::TEMPLATE_OPTIONS_MENU,
 			fn() => ['audience' => self::NAME_BANK[array_rand(self::NAME_BANK)]]
 		);
 	}

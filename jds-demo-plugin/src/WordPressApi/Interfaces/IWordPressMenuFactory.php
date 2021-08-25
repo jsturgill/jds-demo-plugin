@@ -4,7 +4,8 @@ namespace JdsDemoPlugin\WordPressApi\Interfaces;
 
 use JdsDemoPlugin\WordPressApi\WordPressMenu;
 
-interface IWordPressMenuFactory {
+interface IWordPressMenuFactory
+{
 
 	/**
 	 * @param string $parentSlug
@@ -12,19 +13,19 @@ interface IWordPressMenuFactory {
 	 * @param string $menuTitle
 	 * @param string $capability
 	 * @param string $menuSlug
-	 * @param callable $renderFunction
+	 * @param callable():void $renderFunction
 	 * @param int|null $position
 	 *
 	 * @return WordPressMenu
 	 */
 	public function createMenuWithRenderCallback(
-		string $parentSlug,
-		string $pageTitle,
-		string $menuTitle,
-		string $capability,
-		string $menuSlug,
+		string   $parentSlug,
+		string   $pageTitle,
+		string   $menuTitle,
+		string   $capability,
+		string   $menuSlug,
 		callable $renderFunction,
-		int $position = null
+		int      $position = null
 	): WordPressMenu;
 
 	/**
@@ -34,19 +35,19 @@ interface IWordPressMenuFactory {
 	 * @param string $capability
 	 * @param string $menuSlug
 	 * @param string $templateName
-	 * @param callable $environmentFactory returns an array to be used as the template context
+	 * @param callable():array<string,mixed> $environmentFactory returns an array to be used as the template context
 	 * @param int|null $position
 	 *
 	 * @return WordPressMenu
 	 */
 	public function createMenuWithTemplate(
-		string $parentSlug,
-		string $pageTitle,
-		string $menuTitle,
-		string $capability,
-		string $menuSlug,
-		string $templateName,
+		string   $parentSlug,
+		string   $pageTitle,
+		string   $menuTitle,
+		string   $capability,
+		string   $menuSlug,
+		string   $templateName,
 		callable $environmentFactory,
-		int $position = null
+		int      $position = null
 	): WordPressMenu;
 }

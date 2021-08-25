@@ -1,0 +1,8 @@
+parameters:
+	level: max
+	paths:
+		- src
+	stubFiles:
+		- stubs/Node.stub
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon

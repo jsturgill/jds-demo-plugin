@@ -6,15 +6,21 @@ use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
 use Twig\Environment;
 
-class WordPressMenuFactory implements IWordPressMenuFactory {
+class WordPressMenuFactory implements IWordPressMenuFactory
+{
 
 	private Environment $twig;
 
-	public static function emptyEnvironmentFactory(): array {
+	/**
+	 * @return array<string,mixed>
+	 */
+	public static function emptyEnvironmentFactory(): array
+	{
 		return [];
 	}
 
-	public function __construct( Environment $twig ) {
+	public function __construct(Environment $twig)
+	{
 		$this->twig = $twig;
 	}
 
@@ -22,48 +28,59 @@ class WordPressMenuFactory implements IWordPressMenuFactory {
 	 * @throws InvalidArgumentException
 	 */
 	public function createMenuWithRenderCallback(
-		string $parentSlug,
-		string $pageTitle,
-		string $menuTitle,
-		string $capability,
-		string $menuSlug,
+		string   $parentSlug,
+		string   $pageTitle,
+		string   $menuTitle,
+		string   $capability,
+		string   $menuSlug,
 		callable $renderFunction,
-		int $position = null
-	): WordPressMenu {
-		return new WordPressMenu( $parentSlug,
+		int      $position = null
+	): WordPressMenu
+	{
+		return new WordPressMenu($parentSlug,
 			$pageTitle,
 			$menuTitle,
 			$capability,
 			$menuSlug,
 			$renderFunction,
-			$position );
+			$position);
 	}
 
 	/**
+	 * @param string $parentSlug
+	 * @param string $pageTitle
+	 * @param string $menuTitle
+	 * @param string $capability
+	 * @param string $menuSlug
+	 * @param string $templateName
+	 * @param callable():array<string, mixed> $environmentFactory
+	 * @param int|null $position
+	 * @return WordPressMenu
 	 * @throws InvalidArgumentException
 	 */
 	public function createMenuWithTemplate(
-		string $parentSlug,
-		string $pageTitle,
-		string $menuTitle,
-		string $capability,
-		string $menuSlug,
-		string $templateName,
+		string   $parentSlug,
+		string   $pageTitle,
+		string   $menuTitle,
+		string   $capability,
+		string   $menuSlug,
+		string   $templateName,
 		callable $environmentFactory,
-		int $position = null
-	): WordPressMenu {
-		if ( ! is_callable( $environmentFactory ) ) {
-			throw new InvalidArgumentException( 'The $environmentFactory argument must be callable' );
+		int      $position = null
+	): WordPressMenu
+	{
+		if (!is_callable($environmentFactory)) {
+			throw new InvalidArgumentException('The $environmentFactory argument must be callable');
 		}
 
-		return $this->createMenuWithRenderCallback( $parentSlug,
+		return $this->createMenuWithRenderCallback($parentSlug,
 			$pageTitle,
 			$menuTitle,
 			$capability,
 			$menuSlug,
-			function () use ( $templateName, $environmentFactory ) {
-				echo $this->twig->render( $templateName, call_user_func( $environmentFactory ) );
+			function () use ($templateName, $environmentFactory) {
+				echo $this->twig->render($templateName, call_user_func($environmentFactory));
 			},
-			$position );
+			$position);
 	}
 }

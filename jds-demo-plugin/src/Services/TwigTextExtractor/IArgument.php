@@ -19,13 +19,15 @@ interface IArgument
 	 * Ensures the string starts with the necessary translators prefix,
 	 * and adds `// ` to the start.
 	 *
-	 * @return ?string
-	 **/
+	 * @param string|null $prefix
+	 * @return string
+	 */
 	public function asSingleLineComment(?string $prefix = null): string;
 
 	/**
+	 * @return float|int|string
 	 * @throws CommandFailureException
 	 */
-	public function asPhpCode(): string;
+	public function asPhpCode();
 
 }
