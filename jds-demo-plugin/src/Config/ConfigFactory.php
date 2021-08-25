@@ -16,9 +16,9 @@ class ConfigFactory
 	private string $translationDomain;
 
 	/**
-	 * @var array<string, object>
+	 * @var array<string, mixed>
 	 */
-	private array $cache;
+	private array $cache = [];
 
 	public function __construct(FileSystem $fileSystem, string $rootPluginPath, string $translationDomain)
 	{
@@ -27,17 +27,20 @@ class ConfigFactory
 	}
 
 	/**
-	 * @template T of Object
+	 * @template T of object
 	 * @param class-string<T> $className
 	 * @param string $key
-	 * @param callable $callback
+	 * @param callable():T $callback
 	 *
 	 * @return T
 	 */
 	private function getOrCache(string $className, string $key, callable $callback): object
 	{
-		// TODO configure PHPStan / Psalm, try to get generics working
-		$this->cache[$key] = $this->cache[$key] ?? $callback();
+
+		if (!array_key_exists($key, $this->cache)) {
+			$instance = $callback();
+			$this->cache[$key] = $instance;
+		}
 
 		return $this->cache[$key];
 	}

@@ -99,7 +99,7 @@ class TwigTextExtractor
 	 * @param IArgument[]|null $sprintfArgs
 	 *
 	 * @return string
-	 * @throws CommandFailureException
+	 * @throws CommandFailureException|InvalidArgumentException
 	 * @see TwigTextExtractor::FUNCTIONS_TO_PARAM_COUNT_MAP
 	 */
 	private function codeGenerator(
@@ -111,7 +111,7 @@ class TwigTextExtractor
 	): string
 	{
 		if ($translationFuncParamsCount < 1) {
-			throw new \http\Exception\InvalidArgumentException("Each translation function requires at least 1 argument");
+			throw new InvalidArgumentException("Each translation function requires at least 1 argument");
 		}
 		// 0-based index means the param count is also the index of the optional comment parameter
 		$comment = array_key_exists($translationFuncParamsCount, $translationFuncArgs) ? $translationFuncArgs[$translationFuncParamsCount] : null;
