@@ -47,5 +47,10 @@ php ../dev-utils/wp-cli.phar i18n make-pot . --ignore-domain languages/jds-demo-
 ```bash
 # from within the ./jds-demo-plugin directory
 cd jds-demo-plugin
+
+# PHPStan
 vendor/bin/phpstan analyse --memory-limit 1G
+
+# Psalm
+./vendor/bin/psalm
 ```
