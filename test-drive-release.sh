@@ -1,22 +1,20 @@
 #!/bin/bash
 
-# downloads wordpress and stages the plugin files
-
-if [ -d "./wordpress/" ]; then
-	echo "-- skipping wordpress download (already present)"
-else
-	curl https://wordpress.org/latest.tar.gz -o wordpress.tar.gz
-	tar -xvf wordpress.tar.gz
-fi
-
 if [ -d "./wordpress/wp-content/plugins/jds-demo-plugin" ]; then
 	rm -rf ./wordpress/wp-content/plugins/jds-demo-plugin
 	echo "-- removed existing plugin files"
 fi
 
-cp -r jds-demo-plugin/ wordpress/wp-content/plugins/
+if ! [ -d "./build" ]; then
+	echo "./build directory not found"
+	exit 1
+fi
 
-echo "copied plugin files to wordpress installation"
+mkdir -p wordpress/wp-content/plugins/jds-demo-plugin/
+
+cp -r build/* wordpress/wp-content/plugins/jds-demo-plugin/
+
+echo "copied release plugin files to wordpress installation"
 echo ""
 
 # backticks below are not intended to execute

@@ -57,4 +57,46 @@ vendor/bin/phpstan analyse --memory-limit 1G
 
 ## Linting
 
-Install PHP CS Fixer according to the project's [installation instructions](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
+Install PHP CS Fixer according to the
+project's [installation instructions](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
+
+## Production Build
+
+Builds are scoped using [PHP Scoper](https://github.com/humbug/php-scoper) to ensure no dependency conflicts with other
+WordPress plugins.
+
+To install:
+
+```bash
+# from within the ./dev-utils directory
+
+cd dev-utils
+mkdir scoper
+cd scoper
+../composer.phar require humbug/php-scoper 
+```
+
+Once this is complete, PHP Scoper can be run by calling `dev-utils/scoper/vendor/bin/php-scoper`.
+
+To manually build:
+
+```bash
+# within the project root (NOT ./jds-demo-plugin)
+
+# load production dependencies
+./dev-utils/composer.phar --working-dir=jds-demo-plugin install --no-dev
+# create the scoped build
+./dev-utils/scoper/vendor/bin/php-scoper add-prefix
+# rebuild the scoped autoloader
+./dev-utils/composer.phar --working-dir=build dump-autoload --classmap-authoritative
+
+# restore dev dependencies
+./dev-utils/composer.phar --working-dir=jds-demo-plugin install
+```
+
+To test drive the build:
+
+```bash
+# within the project root (NOT ./jds-demo-plugin)
+./test-drive-release.sh
+```
