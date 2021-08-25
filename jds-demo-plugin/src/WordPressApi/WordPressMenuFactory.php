@@ -47,6 +47,15 @@ class WordPressMenuFactory implements IWordPressMenuFactory
 	}
 
 	/**
+	 * @param string $parentSlug
+	 * @param string $pageTitle
+	 * @param string $menuTitle
+	 * @param string $capability
+	 * @param string $menuSlug
+	 * @param string $templateName
+	 * @param callable():array<string, mixed> $environmentFactory
+	 * @param int|null $position
+	 * @return WordPressMenu
 	 * @throws InvalidArgumentException
 	 */
 	public function createMenuWithTemplate(

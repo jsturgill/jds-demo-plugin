@@ -44,7 +44,9 @@ class DependencyContainerFactory
 			'paths.pluginRoot' => $rootPluginPath,
 			'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
 			ConfigFactory::class => function (ContainerInterface $c) {
-				return new ConfigFactory($c->get(FileSystem::class), $c->get('paths.pluginRoot'), $c->get('keys.translationDomain'));
+				/** @var FileSystem $fileSystem */
+				$fileSystem = $c->get(FileSystem::class);
+				return new ConfigFactory($fileSystem, (string)$c->get('paths.pluginRoot'), (string)$c->get('keys.translationDomain'));
 			},
 			TemplateConfig::class => function (ContainerInterface $c) {
 				/** @var ConfigFactory $configFactory */
@@ -68,7 +70,9 @@ class DependencyContainerFactory
 				/** @var TemplateConfig $templateConfig */
 				$templateConfig = $c->get(TemplateConfig::class);
 
-				$twig = new Environment($c->get(LoaderInterface::class), [
+				/** @var LoaderInterface $loader */
+				$loader = $c->get(LoaderInterface::class);
+				$twig = new Environment($loader, [
 					'cache' => $templateConfig->templateCachePath
 				]);
 

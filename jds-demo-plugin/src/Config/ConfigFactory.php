@@ -42,6 +42,7 @@ class ConfigFactory
 			$this->cache[$key] = $instance;
 		}
 
+		/** @var T */
 		return $this->cache[$key];
 	}
 
@@ -52,8 +53,8 @@ class ConfigFactory
 		$result = $this->getOrCache(TemplateConfig::class,
 			'templateConfig',
 			fn() => new TemplateConfig(
-				$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATES,
-				$this->pluginRootPath . $this::PATH_PARTIAL_TEMPLATE_CACHE
+				$this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TEMPLATES,
+				$this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TEMPLATE_CACHE
 			));
 
 		return $result;
@@ -67,7 +68,7 @@ class ConfigFactory
 			'twigTextExtractionConfig',
 			fn() => new TwigTextExtractorConfig(
 				$this->createTemplateConfig(),
-				$this->pluginRootPath . $this::PATH_PARTIAL_TWIG_TEXT_CACHE,
+				$this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TWIG_TEXT_CACHE,
 				$this->translationDomain
 			)
 		);

@@ -80,6 +80,7 @@ class TwigTextExtractor
 
 		$result = [];
 
+		/** @var Node $argument */
 		foreach ($node->getNode('arguments')->getIterator() as $argument) {
 			array_push($result, $this->argumentFactory->ofNode($argument));
 		}
@@ -156,25 +157,26 @@ class TwigTextExtractor
 	 * @param FunctionExpression $node
 	 * @param array<string,string> $text
 	 * @throws CommandFailureException
+	 * @throws Exception
 	 * @see TwigTextExtractor::processFilterExpression the more complex "sprintf" style case
 	 */
 	private function processFunctionExpression(FunctionExpression $node, array &$text): void
 	{
-		$functionName = $node->getAttribute('name');
+		$functionName = (string)$node->getAttribute('name');
 
 		if (!array_key_exists($functionName, self::FUNCTIONS_TO_PARAM_COUNT_MAP)) {
 			return;
 		}
 
 		$arguments = $this->extractArguments($node, self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName]);
-		$textValue = $arguments[0]->asPhpCode();
+		$textValue = (string)$arguments[0]->asPhpCode();
 
 		// don't overwrite the value if it already exists
-		if (array_key_exists((string)$textValue, $text)) {
+		if (array_key_exists($textValue, $text)) {
 			return;
 		}
 
-		$text[(string)$textValue] = $this->codeGenerator($arguments,
+		$text[$textValue] = $this->codeGenerator($arguments,
 			$functionName,
 			self::FUNCTIONS_TO_PARAM_COUNT_MAP[$functionName]
 		);
@@ -183,7 +185,8 @@ class TwigTextExtractor
 	/**
 	 * @param FilterExpression $node
 	 * @param array<string,string> $text
-	 * @throws CommandFailureException
+	 * @throws CommandFailureException|InvalidArgumentException
+	 * @throws Exception
 	 */
 	private function processFilterExpression(FilterExpression $node, array &$text): void
 	{
@@ -195,7 +198,7 @@ class TwigTextExtractor
 			return;
 		}
 
-		$functionName = $filteredNode->getAttribute('name');
+		$functionName = (string)$filteredNode->getAttribute('name');
 
 		if (!array_key_exists($functionName, self::FUNCTIONS_TO_PARAM_COUNT_MAP)) {
 			return;
@@ -225,6 +228,7 @@ class TwigTextExtractor
 	 * @param Node $node
 	 * @param array<string,string> $text
 	 * @throws CommandFailureException
+	 * @throws Exception
 	 */
 	private function processNode(Node $node, array &$text): void
 	{
@@ -237,7 +241,8 @@ class TwigTextExtractor
 		if ($node instanceof FunctionExpression) {
 			$this->processFunctionExpression($node, $text);
 		}
-		// todo pluralization?
+
+		/** @var Node $childNode */
 		foreach ($node->getIterator() as $childNode) {
 			$this->processNode($childNode, $text);
 		}
@@ -270,6 +275,7 @@ class TwigTextExtractor
 		$nodes = $this->twig->parse($stream);
 		$text = [];
 
+		/** @var Node $node */
 		foreach ($nodes->getIterator() as $node) {
 			$this->processNode($node, $text);
 		}

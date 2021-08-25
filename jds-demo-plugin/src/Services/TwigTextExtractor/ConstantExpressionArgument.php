@@ -14,7 +14,9 @@ class ConstantExpressionArgument extends AbstractArgument implements IArgument
 
 	public function __construct(ConstantExpression $node)
 	{
-		$this->value = $node->getAttribute('value');
+		/** @var string|int|float $value */
+		$value = $node->getAttribute('value');
+		$this->value = $value;
 	}
 
 	public function asSingleLineComment(?string $prefix = null): string
