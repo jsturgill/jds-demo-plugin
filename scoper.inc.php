@@ -31,9 +31,9 @@ return [
                 'Tests',
                 'vendor-bin',
             ])
-            ->in('jds-demo-plugin/vendor'),
+            ->in('./jds-demo-plugin/vendor'),
         Finder::create()->append([
-            'jds-demo-plugin/composer.json',
+            './jds-demo-plugin/composer.json',
         ]),
     ],
 
@@ -41,7 +41,7 @@ return [
     // a file untouched.
     // Paths are relative to the configuration file unless if they are already absolute
     'files-whitelist' => [
-        'jds-demo-plugin/vendor/php-di/php-di/src/Compiler/Template.php'
+        './jds-demo-plugin/vendor/php-di/php-di/src/Compiler/Template.php'
     ],
 
     // When scoping PHP files, there will be scenarios where some of the code being scoped indirectly references the
@@ -52,8 +52,67 @@ return [
     // For more see: https://github.com/humbug/php-scoper#patchers
     'patchers' => [
         function (string $filePath, string $prefix, string $contents): string {
-            // Change the contents here.
+            try {
+                $twigFunctionsReferenceFile = realpath(__DIR__ . '/scoper-fixes/twigFunctions.json');
 
+                if ($twigFunctionsReferenceFile === false) {
+                    echo "Unable to determine the twig global function information file path: $twigFunctionsReferenceFile\n\n";
+                    die;
+                }
+
+                $twigRoot = join(DIRECTORY_SEPARATOR, ['twig', 'twig', 'src']) . DIRECTORY_SEPARATOR;
+
+                // only process twig files
+                $isTwigFile = false !== mb_strpos($filePath, $twigRoot);
+
+                if (!$isTwigFile) {
+                    return $contents;
+                }
+
+                $rawFunctionsFileContents = file_get_contents($twigFunctionsReferenceFile);
+
+                if ($rawFunctionsFileContents === false) {
+                    echo "Unable to read twig global function information: $twigFunctionsReferenceFile\n\n";
+                    die;
+                }
+
+                $segments = explode(DIRECTORY_SEPARATOR, $filePath);
+                $fileName = array_pop($segments);
+
+                $twigRootFunctionsLookup = json_decode($rawFunctionsFileContents, true);
+
+                // filter the complete list to only include functions not defined in this particular file
+                $twigRootFunctionsList = array_filter(
+                    array_keys($twigRootFunctionsLookup),
+                    fn (string $func) => $twigRootFunctionsLookup[$func] !== $fileName
+                );
+
+                $twigRootReplacements = array_map(
+                    fn ($func) => '\\' . $prefix . '\\' . $func,
+                    $twigRootFunctionsList
+                );
+
+                // replace global functions
+                $contents = str_replace($twigRootFunctionsList, $twigRootReplacements, $contents);
+
+
+                // todo replace string'd functions
+                $singleQuoteFunctionStrings = array_map(fn ($func) =>"'$func'", array_keys($twigRootFunctionsLookup));
+                $singeQuoteReplacements = array_map(fn ($func) => "'$prefix\\$func'", array_keys($twigRootFunctionsLookup));
+                $contents = str_replace($singleQuoteFunctionStrings, $singeQuoteReplacements, $contents);
+
+                // replace compilation strings
+                $moduleNode = 'ModuleNode.php';
+                if ($moduleNode === $fileName) {
+                    $contents = preg_replace_callback(
+                        "/\"use (Twig\\\+[^\"]+)\"/",
+                        fn (array $matches) => "\"use $prefix\\\\$matches[1]\"",
+                        $contents
+                    );
+                }
+            } catch (\Exception $e) {
+                echo $e;
+            }
             return $contents;
         },
     ],
