@@ -13,21 +13,20 @@ use JdsDemoPlugin\Exceptions\CommandFailureException;
  */
 interface IArgument
 {
-	/**
-	 * Returns a string guaranteed not to contain line breaks or `?>`
-	 *
-	 * Ensures the string starts with the necessary translators prefix,
-	 * and adds `// ` to the start.
-	 *
-	 * @param string|null $prefix
-	 * @return string
-	 */
-	public function asSingleLineComment(?string $prefix = null): string;
+    /**
+     * Returns a string guaranteed not to contain line breaks or `?>`
+     *
+     * Ensures the string starts with the necessary translators prefix,
+     * and adds `// ` to the start.
+     *
+     * @param string|null $prefix
+     * @return string
+     */
+    public function asSingleLineComment(?string $prefix = null): string;
 
-	/**
-	 * @return float|int|string
-	 * @throws CommandFailureException
-	 */
-	public function asPhpCode();
-
+    /**
+     * @return float|int|string
+     * @throws CommandFailureException
+     */
+    public function asPhpCode();
 }

@@ -19,125 +19,125 @@ use SplFileInfo;
  */
 class FileSystem
 {
-	const PATH_SEPARATORS = '/\\';
-	private string $root;
-	private int $rootLength;
+    public const PATH_SEPARATORS = '/\\';
+    private string $root;
+    private int $rootLength;
 
-	/** @noinspection PhpUnused */
-	public static function deleteAllFilter(): bool
-	{
-		return true;
-	}
+    /** @noinspection PhpUnused */
+    public static function deleteAllFilter(): bool
+    {
+        return true;
+    }
 
-	public static function deleteAllButGitignore(SplFileInfo $fileInfo): bool
-	{
-		return '.gitignore' !== $fileInfo->getFilename();
-	}
+    public static function deleteAllButGitignore(SplFileInfo $fileInfo): bool
+    {
+        return '.gitignore' !== $fileInfo->getFilename();
+    }
 
-	public function forceTrailingSlash(string $path): string
-	{
-		return rtrim($path, self::PATH_SEPARATORS) . '/';
-	}
+    public function forceTrailingSlash(string $path): string
+    {
+        return rtrim($path, self::PATH_SEPARATORS) . '/';
+    }
 
-	/**
-	 * @throws InvalidArgumentException
-	 */
-	public function __construct(string $root, bool $verifyPath = true)
-	{
-		$realRoot = realpath($root);
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function __construct(string $root, bool $verifyPath = true)
+    {
+        $realRoot = realpath($root);
 
-		if (false === $realRoot) {
-			throw new InvalidArgumentException("The root path passed into FileSystem does not appear to be valid: $root");
-		}
+        if (false === $realRoot) {
+            throw new InvalidArgumentException("The root path passed into FileSystem does not appear to be valid: $root");
+        }
 
-		if ($verifyPath && 0 !== mb_strpos($realRoot, dirname(__DIR__, 2))) {
-			throw new InvalidArgumentException("The root path passed into FileSystem does not appear to be a parent of the plugin directory: $realRoot");
-		}
+        if ($verifyPath && 0 !== mb_strpos($realRoot, dirname(__DIR__, 2))) {
+            throw new InvalidArgumentException("The root path passed into FileSystem does not appear to be a parent of the plugin directory: $realRoot");
+        }
 
-		// check to see if the string looks like / or c:/ -- possible file system root paths
-		if (preg_match('/^(\/)$|^([a-z]+:\/)$/i', $realRoot)) {
-			trigger_error("FileSystem created with the file system as a root path ($realRoot)", E_USER_WARNING);
-		}
+        // check to see if the string looks like / or c:/ -- possible file system root paths
+        if (preg_match('/^(\/)$|^([a-z]+:\/)$/i', $realRoot)) {
+            trigger_error("FileSystem created with the file system as a root path ($realRoot)", E_USER_WARNING);
+        }
 
-		$this->root = $realRoot;
-		$this->rootLength = mb_strlen($realRoot);
-	}
+        $this->root = $realRoot;
+        $this->rootLength = mb_strlen($realRoot);
+    }
 
-	/**
-	 * @throws InvalidArgumentException
-	 */
-	private function toAbsoluteSafePath(string $path): string
-	{
-		$realPath = realpath($path);
-		if (false === $realPath) {
-			throw new InvalidArgumentException("Unable to resolve path: $path");
-		}
-		if (mb_substr($realPath, 0, $this->rootLength) !== $this->root) {
-			throw new InvalidArgumentException("The FileSystem class can only operate within an allowed root directory. Allowed root path: '$this->root'. Attempted target path: '$realPath'");
-		}
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function toAbsoluteSafePath(string $path): string
+    {
+        $realPath = realpath($path);
+        if (false === $realPath) {
+            throw new InvalidArgumentException("Unable to resolve path: $path");
+        }
+        if (mb_substr($realPath, 0, $this->rootLength) !== $this->root) {
+            throw new InvalidArgumentException("The FileSystem class can only operate within an allowed root directory. Allowed root path: '$this->root'. Attempted target path: '$realPath'");
+        }
 
-		return $realPath;
-	}
+        return $realPath;
+    }
 
-	/**
-	 * @param string $path
-	 * @return RecursiveIteratorIterator<RecursiveDirectoryIterator>
-	 * @throws InvalidArgumentException
-	 */
-	private function createFileInfoIterator(string $path): RecursiveIteratorIterator
-	{
-		return new RecursiveIteratorIterator(
-			new RecursiveDirectoryIterator($this->toAbsoluteSafePath($path), FilesystemIterator::SKIP_DOTS),
-			RecursiveIteratorIterator::CHILD_FIRST
-		);
-	}
+    /**
+     * @param string $path
+     * @return RecursiveIteratorIterator<RecursiveDirectoryIterator>
+     * @throws InvalidArgumentException
+     */
+    private function createFileInfoIterator(string $path): RecursiveIteratorIterator
+    {
+        return new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->toAbsoluteSafePath($path), FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+    }
 
-	/**
-	 * Clear a directory of files
-	 *
-	 * An optional predicate (filter) callback can determine which files, if any, to keep.
-	 *
-	 * The predicate will receive a `SplFileInfo` object as a parameter.
-	 *
-	 * @throws InvalidArgumentException
-	 * @throws CommandFailureException
-	 * @see FileSystem::deleteAllButGitignore an example filter implementation
-	 */
-	public function emptyDirectory(string $path, ?callable $predicate = null): void
-	{
-		$predicate = $predicate ?? [FileSystem::class, 'deleteAllFilter'];
-		$iterator = $this->createFileInfoIterator($path);
-		/** @var SplFileInfo $fileInfo */
-		foreach ($iterator as $fileInfo) {
-			if ($predicate($fileInfo) && false !== $fileInfo->getRealPath()) {
-				$result = $fileInfo->isDir()
-					? rmdir($fileInfo->getRealPath())
-					: unlink($fileInfo->getRealPath());
-				if ($result !== true) {
-					throw new CommandFailureException("Unable to delete file or directory: {$fileInfo->getRealPath()}");
-				}
-			}
-		}
-	}
+    /**
+     * Clear a directory of files
+     *
+     * An optional predicate (filter) callback can determine which files, if any, to keep.
+     *
+     * The predicate will receive a `SplFileInfo` object as a parameter.
+     *
+     * @throws InvalidArgumentException
+     * @throws CommandFailureException
+     * @see FileSystem::deleteAllButGitignore an example filter implementation
+     */
+    public function emptyDirectory(string $path, ?callable $predicate = null): void
+    {
+        $predicate = $predicate ?? [FileSystem::class, 'deleteAllFilter'];
+        $iterator = $this->createFileInfoIterator($path);
+        /** @var SplFileInfo $fileInfo */
+        foreach ($iterator as $fileInfo) {
+            if ($predicate($fileInfo) && false !== $fileInfo->getRealPath()) {
+                $result = $fileInfo->isDir()
+                    ? rmdir($fileInfo->getRealPath())
+                    : unlink($fileInfo->getRealPath());
+                if ($result !== true) {
+                    throw new CommandFailureException("Unable to delete file or directory: {$fileInfo->getRealPath()}");
+                }
+            }
+        }
+    }
 
-	/**
-	 * Process files in a directory
-	 *
-	 * The delegate will receive all files. Directories will be passed to the delegate
-	 * if the $includeDirectories flag is set to true.
-	 * @throws InvalidArgumentException
-	 */
-	public function processFiles(string $path, callable $delegate, bool $includeDirectories = false): void
-	{
-		if (!is_callable($delegate)) {
-			throw new InvalidArgumentException('The delegate parameter must be callable');
-		}
-		$iterator = $this->createFileInfoIterator($path);
-		/** @var SplFileInfo $fileInfo */
-		foreach ($iterator as $fileInfo) {
-			if ($fileInfo->isFile() || $includeDirectories) {
-				$delegate($fileInfo);
-			}
-		}
-	}
+    /**
+     * Process files in a directory
+     *
+     * The delegate will receive all files. Directories will be passed to the delegate
+     * if the $includeDirectories flag is set to true.
+     * @throws InvalidArgumentException
+     */
+    public function processFiles(string $path, callable $delegate, bool $includeDirectories = false): void
+    {
+        if (!is_callable($delegate)) {
+            throw new InvalidArgumentException('The delegate parameter must be callable');
+        }
+        $iterator = $this->createFileInfoIterator($path);
+        /** @var SplFileInfo $fileInfo */
+        foreach ($iterator as $fileInfo) {
+            if ($fileInfo->isFile() || $includeDirectories) {
+                $delegate($fileInfo);
+            }
+        }
+    }
 }
