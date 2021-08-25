@@ -27,6 +27,8 @@ class ConfigFactory
 	}
 
 	/**
+	 *
+	 * @psalm-suppress UnusedParam
 	 * @template T of object
 	 * @param class-string<T> $className
 	 * @param string $key

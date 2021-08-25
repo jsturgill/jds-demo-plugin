@@ -22,6 +22,7 @@ class DependencyContainerFactory
 	const ENV_TEST = 'test';
 
 	/**
+	 * @psalm-suppress UnusedClosureParam
 	 * Create a DI container
 	 * @throws Exception
 	 * @noinspection PhpUnusedParameterInspection
