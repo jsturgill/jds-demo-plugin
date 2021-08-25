@@ -57,11 +57,4 @@ vendor/bin/phpstan analyse --memory-limit 1G
 
 ## Linting
 
-Download the `php-cs-fixer-v3.phar` to the `./dev-utils` directory:
-
-```bash
-# from within the ./jds-demo-plugin directory
-cd jds-demo-plugin
-
-php ../dev-utils/php-cs-fixer-v3.phar fix src
-```
+Install PHP CS Fixer according to the project's [installation instructions](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
