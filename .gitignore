@@ -3,3 +3,4 @@ DEVNOTES.md
 /wordpress*
 .idea/
 dev-utils/
+*.cache

@@ -4,6 +4,6 @@ namespace JdsDemoPlugin\Exceptions;
 
 use Exception;
 
-class CommandFailureException extends Exception {
-
+class CommandFailureException extends Exception
+{
 }

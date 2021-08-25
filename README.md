@@ -54,3 +54,7 @@ vendor/bin/phpstan analyse --memory-limit 1G
 # Psalm
 ./vendor/bin/psalm
 ```
+
+## Linting
+
+Install PHP CS Fixer according to the project's [installation instructions](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
