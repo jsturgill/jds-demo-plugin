@@ -1,12 +1,10 @@
 <?php
 
-/** @noinspection PhpUnused */
+/** @noinspection PhpIllegalPsrClassPathInspection */
 
 namespace JdsDemoPlugin\Tests;
 
 use Codeception\Test\Unit;
-use Exception;
-use JdsDemoPlugin\Services\DependencyContainerFactory;
 use JdsDemoPlugin\Services\TwigTextExtractor;
 use Psr\Container\ContainerInterface;
 use SplFileInfo;
@@ -18,49 +16,54 @@ class TwigTextExtractorTest extends Unit
     protected UnitTester $tester;
 
     protected ContainerInterface $di;
-    protected TwigTextExtractor $instance;
+    protected ?TwigTextExtractor $twigTextExtractor = null;
 
-    public const TEMPLATES_PATH_PARTIAL = TEST_FILES_ROOT . "/templates";
-    public const OUTPUT_PATH_PARTIAL = TEST_FILES_ROOT . "/cache/gettext";
     public const TEMPLATE_SUFFIX = '-function-template';
 
-    private function getGoldenMasterContents(string $fileName): string
-    {
-        return file_get_contents(GOLDEN_MASTERS_ROOT . "/TwigTextExtractor/$fileName." . GOLDEN_MASTERS_EXTENSION);
-    }
+    public const GOLDEN_MASTERS_NAMESPACE = 'TwigTextExtractor';
+    public const TEMPLATES_PATH_PARTIAL = 'templates';
+    public const OUTPUT_PATH_PARTIAL = 'cache/gettext';
 
-    private function templatePath(string $fileName): string
-    {
-        return self::TEMPLATES_PATH_PARTIAL . "/$fileName.twig";
-    }
+    public const TEMPLATE_EXTENSION = 'twig';
+    public const OUTPUT_EXTENSION = 'php';
 
-    private function outputPath(string $fileName): string
-    {
-        return self::OUTPUT_PATH_PARTIAL . "/$fileName.php";
-    }
 
-    /**
-     * @throws Exception
-     */
     protected function _before()
     {
-        $this->di = (new DependencyContainerFactory())->create(TEST_FILES_ROOT, DependencyContainerFactory::ENV_TEST);
-        $this->instance = $this->di->get(TwigTextExtractor::class);
+        if (null === $this->twigTextExtractor) {
+            $this->twigTextExtractor = $this->tester->getDiContainer()->get(TwigTextExtractor::class);
+        }
     }
 
     protected function _after()
     {
     }
 
+    private function getOutputFileContents($fileName): string
+    {
+        return $this->tester->getTestFileContents(self::OUTPUT_PATH_PARTIAL
+            . DIRECTORY_SEPARATOR
+            . $fileName);
+    }
+
+    private function getTemplatePath(string $fileNamePartial): string
+    {
+        return $this->tester->getTestFilesRoot()
+            . DIRECTORY_SEPARATOR
+            . self::TEMPLATES_PATH_PARTIAL
+            . DIRECTORY_SEPARATOR
+            . $fileNamePartial . '.' . self::TEMPLATE_EXTENSION;
+    }
+
     /**
      * @throws SyntaxError
      */
-    private function testTemplateAgainstMaster($fileName)
+    private function testTemplateAgainstMaster(string $fileNamePartial)
     {
-        $file = new SplFileInfo($this->templatePath($fileName));
-        $this->instance->processTwigTemplate($file);
-        $output = file_get_contents($this->outputPath($fileName));
-        $goldenMaster = $this->getGoldenMasterContents($fileName);
+        $file = new SplFileInfo($this->getTemplatePath($fileNamePartial));
+        $this->twigTextExtractor->processTwigTemplate($file);
+        $output = $this->getOutputFileContents($fileNamePartial . '.' . self::OUTPUT_EXTENSION);
+        $goldenMaster = $this->tester->getGoldenMasterContents(self::GOLDEN_MASTERS_NAMESPACE . DIRECTORY_SEPARATOR . $fileNamePartial . '.txt');
         self::assertEquals($goldenMaster, $output);
     }
 
