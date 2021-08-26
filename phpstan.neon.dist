@@ -2,8 +2,6 @@ parameters:
 	level: max
 	paths:
 		- jds-demo-plugin/src
-		- jds-demo-plugin/tests/unit
-		- jds-demo-plugin/tests/bootstrap.php
 	stubFiles:
 		- stubs/Node.stub
 	scanDirectories:
