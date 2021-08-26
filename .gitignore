@@ -1,7 +1,6 @@
 DEVNOTES.md
 .env
-/wordpress*
+wordpress*
 .idea/
-dev-utils/
 *.cache
 build/
