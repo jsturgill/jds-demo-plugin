@@ -8,6 +8,7 @@ use JdsDemoPlugin\Config\ConfigFactory;
 use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Config\TwigTextExtractorConfig;
 use JdsDemoPlugin\Plugin;
+use JdsDemoPlugin\Services\Persistence\MigrationManager;
 use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
 use JdsDemoPlugin\WordPressApi\WordPressMenuFactory;
 use Monolog\Handler\StreamHandler;
@@ -50,6 +51,7 @@ class DependencyContainerFactory
         $containerBuilder->addDefinitions([
             'paths.pluginRoot' => $rootPluginPath,
             'paths.loggingFolder' => $rootPluginPath . self::LOG_PATH_PARTIAL . DIRECTORY_SEPARATOR,
+            'paths.phinxConfig' => $rootPluginPath . 'phinx.php',
             'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
             'keys.environment' => $env,
             'keys.productionEnvironment' => self::ENV_PROD,
@@ -197,7 +199,9 @@ class DependencyContainerFactory
             TwigTextExtractor::class => DI\autowire(TwigTextExtractor::class),
             IWordPressMenuFactory::class => DI\autowire(WordPressMenuFactory::class),
             Plugin::class => DI\autowire(Plugin::class),
-            FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true)
+            FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true),
+            MigrationManager::class => DI\autowire(MigrationManager::class)
+                ->constructorParameter('phinxConfigPath', DI\get('paths.phinxConfig')),
         ]);
 
         return $containerBuilder->build();
