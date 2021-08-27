@@ -20,7 +20,9 @@ return [
         Finder::create()->files()->in(['./jds-demo-plugin/src',
             './jds-demo-plugin/tasks',
             './jds-demo-plugin/languages',
-            './jds-demo-plugin/templates']),
+            './jds-demo-plugin/templates',
+            './jds-demo-plugin/logs'
+            ])->notName(['*.log']),
         Finder::create()->files()->in('./jds-demo-plugin')->name(['jsd-demo-plugin.php']),
         Finder::create()
             ->files()

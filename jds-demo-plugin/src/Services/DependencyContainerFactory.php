@@ -51,6 +51,9 @@ class DependencyContainerFactory
             'paths.pluginRoot' => $rootPluginPath,
             'paths.loggingFolder' => $rootPluginPath . self::LOG_PATH_PARTIAL . DIRECTORY_SEPARATOR,
             'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
+            'keys.environment' => $env,
+            'keys.productionEnvironment' => self::ENV_PROD,
+            'keys.testEnvironment' => self::ENV_TEST,
             ConfigFactory::class => function (ContainerInterface $c) {
                 /** @var FileSystem $fileSystem */
                 $fileSystem = $c->get(FileSystem::class);
@@ -74,9 +77,11 @@ class DependencyContainerFactory
 
                 return new FilesystemLoader($templateConfig->templateRootPath);
             },
-            LoggerInterface::class => function (ContainerInterface $c) use ($env) {
+            LoggerInterface::class => function (ContainerInterface $c) {
+                $env = (string)$c->get('keys.environment');
+                $testEnvValue = (string)$c->get('keys.testEnvironment');
                 $logger = new Logger('jds-demo-plugin::' . $env);
-                $level = $env === self::ENV_TEST
+                $level = $env === $testEnvValue
                     ? Logger::INFO
                     : Logger::NOTICE;
                 $logFolder = (string)$c->get('paths.loggingFolder');
