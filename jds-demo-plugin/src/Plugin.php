@@ -4,14 +4,14 @@ namespace JdsDemoPlugin;
 
 use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
 use JdsDemoPlugin\WordPressApi\WordPressMenu;
+use Psr\Log\LoggerInterface;
 
 class Plugin
 {
+    public const NAME_BANK = ['You', 'Person', 'World', 'Dolly'];
     public const TRANSLATION_DOMAIN = 'jds-demo-plugin-domain';
     public const TEMPLATE_OPTIONS_MENU = 'jds-demo-plugin-options.twig';
     private WordPressMenu $optionsMenu;
-
-    public const NAME_BANK = ['You', 'Person', 'World', 'Dolly'];
 
     public function __construct(IWordPressMenuFactory $menuFactory)
     {
