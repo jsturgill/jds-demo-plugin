@@ -1,0 +1,10 @@
+parameters:
+	level: max
+	paths:
+		- jds-demo-plugin/src
+	stubFiles:
+		- stubs/Node.stub
+	scanDirectories:
+	 	- jds-demo-plugin/vendor
+includes:
+	- dev-utils/phpstan/vendor/szepeviktor/phpstan-wordpress/extension.neon

@@ -1,60 +1,85 @@
 # Demo Plugin
 
+Below are instructions on how to get the dev environment up and running.
+
+The commands should work in Linux or Windows under git bash -- and if they do not, it should be straightforward for you
+to adjust as necessary for your environment.
+
+Note: Docker compose is required.
+
 ## Local Dev Environment
 
 To get started:
 
 1. copy `.env.template` to `.env` and update any values, then
-2. run `init.sh` to download WordPress and stage the plugin files, and then
-3. execute `docker compose up`
-
-Note: Docker compose and curl are required. Should work with git bash on windows.
+2. run `init.sh` to download WordPress and stage the plugin files. Finally,
+3. execute `docker compose up`.
 
 ## Dev-Utils
 
-The `dev-utils` folder is not checked into version control. Example commands in this documentation expects
-following `.phar` files to be present:
+The example commands in this documentation expect certain `phar` files to exist in `dev-utils`.
 
-- `wp-cli.phar`
-- `composer.phar`
+Run the following command to download them:
 
-If you have those files installed somewhere else, or installed globally, it should be straightforward to modify the
-provided commands for your dev environment.
+```bash
+./dev-utils/fetch-phars.sh
+```
 
 ## Tests
 
+To run tests:
+
 ```bash
-# from within the ./jds-demo-plugin directory
-cd jds-demo-plugin
-php vendor/bin/codecept run
+./jds-demo-plugin/vendor/bin/codecept -c jds-demo-plugin run
 ```
 
 ## Updating the .pot file
 
 ```bash
-# from within the ./jds-demo-plugin directory
-cd jds-demo-plugin
-
-# below parses twig templates and creates a dummy file with translated strings
-php tasks/extract-twig-text.php
+# extract info from the twig templates
+php jds-demo-plugin/tasks/extract-twig-text.php
 
 # run wp-cli to create/update the .pot file
-php ../dev-utils/wp-cli.phar i18n make-pot . --ignore-domain languages/jds-demo-plugin.pot --path=../wordpress --include=cache/gettext/*.php --exclude=tests/* --merge
+./refresh-pot.sh
 ```
 
 ## Static Analysis
 
 ```bash
-# from within the ./jds-demo-plugin directory
-cd jds-demo-plugin
-
-# PHPStan
-vendor/bin/phpstan analyse --memory-limit 1G
+./dev-utils/phpstan/vendor/bin/phpstan analyse --memory-limit 1G
 
 # Psalm
-./vendor/bin/psalm
+./jds-demo-plugin/vendor/bin/psalm -c jds-demo-plugin/psalm.xml
 ```
 
 ## Linting
 
-Install PHP CS Fixer according to the project's [installation instructions](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
+The call to `init.sh` should run composer and install PHP CS Fixer in `./dev-utils/php-cs-fixer`.
+
+To fix files:
+
+```bash
+./dev-utils/php-cs-fixer/vendor/bin/php-cs-fixer fix
+```
+
+Integrating PHP CS Fixer with your IDE of choice is an exercise left to the reader.
+
+## Production Build
+
+Builds are scoped using [PHP Scoper](https://github.com/humbug/php-scoper) to ensure no dependency conflicts with other
+WordPress plugins.
+
+The call to `init.sh` should run composer and install PHP Scoper in '/dev-utils/scoper'.
+
+To build:
+
+```bash
+./build.sh
+```
+
+To test drive the build on localhost:
+
+```bash
+# within the project root (NOT ./jds-demo-plugin)
+./test-drive-release.sh
+```

@@ -46,8 +46,7 @@ class TwigTextExtractor
         Environment             $twig,
         FileSystem              $fileSystem,
         ArgumentFactory         $argumentFactory
-    )
-    {
+    ) {
         $this->config = $config;
         $this->twig = $twig;
         $this->fileSystem = $fileSystem;
