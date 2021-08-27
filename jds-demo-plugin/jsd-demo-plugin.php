@@ -1,4 +1,5 @@
 <?php
+
 /** @noinspection PhpUndefinedFunctionInspection */
 
 /**
@@ -19,21 +20,27 @@
 
 namespace JdsDemoPlugin;
 
-
 use Exception;
 use JdsDemoPlugin\Services\DependencyContainerFactory;
+use Psr\Log\LoggerInterface;
 
 define("JdsDemoPlugin\ROOT_PLUGIN_DIR", plugin_dir_path(__FILE__));
 
 /** @noinspection PhpIncludeInspection */
 require ROOT_PLUGIN_DIR . 'vendor/autoload.php';
-
+$logger = null;
 try {
-	$di = (new DependencyContainerFactory)->create(ROOT_PLUGIN_DIR);
+    $di = (new DependencyContainerFactory())->create(ROOT_PLUGIN_DIR);
 
-	/** @var Plugin $plugin */
-	/** @noinspection PhpUnusedLocalVariableInspection */
-	$plugin = $di->get(Plugin::class);
+    /** @var LoggerInterface $logger */
+    $logger = $di->get(LoggerInterface::class);
+
+    /** @var Plugin $plugin */
+    /** @noinspection PhpUnusedLocalVariableInspection */
+    $plugin = $di->get(Plugin::class);
 } catch (Exception $e) {
-	error_log("jds-demo-plugin failed to initialize: {$e->getMessage()}");
+    error_log("jds-demo-plugin failed to initialize: {$e->getMessage()}");
+    if (null !== $logger) {
+        $logger->error("Plugin failed to initialize", ['message'=> $e->getMessage(), 'stack' => $e->getTrace()]);
+    }
 }

@@ -10,7 +10,10 @@ use JdsDemoPlugin\Config\TwigTextExtractorConfig;
 use JdsDemoPlugin\Plugin;
 use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
 use JdsDemoPlugin\WordPressApi\WordPressMenuFactory;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
@@ -20,6 +23,8 @@ class DependencyContainerFactory
 {
     public const ENV_PROD = 'production';
     public const ENV_TEST = 'test';
+
+    public const LOG_PATH_PARTIAL = 'logs';
 
     /**
      * @psalm-suppress UnusedClosureParam
@@ -41,8 +46,10 @@ class DependencyContainerFactory
             $containerBuilder->enableCompilation($rootPluginPath . ConfigFactory::PATH_PARTIAL_DI_CACHE);
         }
 
+        /** @noinspection DuplicatedCode */
         $containerBuilder->addDefinitions([
             'paths.pluginRoot' => $rootPluginPath,
+            'paths.loggingFolder' => $rootPluginPath . self::LOG_PATH_PARTIAL . DIRECTORY_SEPARATOR,
             'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
             ConfigFactory::class => function (ContainerInterface $c) {
                 /** @var FileSystem $fileSystem */
@@ -66,6 +73,17 @@ class DependencyContainerFactory
                 $templateConfig = $c->get(TemplateConfig::class);
 
                 return new FilesystemLoader($templateConfig->templateRootPath);
+            },
+            LoggerInterface::class => function (ContainerInterface $c) use ($env) {
+                $logger = new Logger('jds-demo-plugin::' . $env);
+                $level = $env === self::ENV_TEST
+                    ? Logger::INFO
+                    : Logger::NOTICE;
+                $logFolder = (string)$c->get('paths.loggingFolder');
+                $logger->pushHandler(
+                    new StreamHandler($logFolder . date('Y-m-d') . '.log', $level)
+                );
+                return $logger;
             },
             Environment::class => function (ContainerInterface $c) {
                 /** @var TemplateConfig $templateConfig */
@@ -168,7 +186,6 @@ class DependencyContainerFactory
                     /** @noinspection PhpUndefinedFunctionInspection */
                     translate_nooped_plural($noopedPlural, $count, 'jds-demo-plugin-domain');
                 }));
-
 
                 return $twig;
             },
