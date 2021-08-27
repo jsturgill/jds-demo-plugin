@@ -3,10 +3,10 @@
 namespace JdsDemoPlugin\WordPressApi;
 
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
-use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
+use JdsDemoPlugin\WordPressApi\IMenuFactory;
 use Twig\Environment;
 
-class WordPressMenuFactory implements IWordPressMenuFactory
+class MenuFactory implements IMenuFactory
 {
     private Environment $twig;
 
@@ -34,8 +34,8 @@ class WordPressMenuFactory implements IWordPressMenuFactory
         string   $menuSlug,
         callable $renderFunction,
         int      $position = null
-    ): WordPressMenu {
-        return new WordPressMenu(
+    ): Menu {
+        return new Menu(
             $parentSlug,
             $pageTitle,
             $menuTitle,
@@ -55,7 +55,7 @@ class WordPressMenuFactory implements IWordPressMenuFactory
      * @param string $templateName
      * @param callable():array<string, mixed> $environmentFactory
      * @param int|null $position
-     * @return WordPressMenu
+     * @return Menu
      * @throws InvalidArgumentException
      */
     public function createMenuWithTemplate(
@@ -67,7 +67,7 @@ class WordPressMenuFactory implements IWordPressMenuFactory
         string   $templateName,
         callable $environmentFactory,
         int      $position = null
-    ): WordPressMenu {
+    ): Menu {
         if (!is_callable($environmentFactory)) {
             throw new InvalidArgumentException('The $environmentFactory argument must be callable');
         }

@@ -24,7 +24,8 @@ use Exception;
 use JdsDemoPlugin\Services\DependencyContainerFactory;
 use Psr\Log\LoggerInterface;
 
-define("JdsDemoPlugin\ROOT_PLUGIN_DIR", plugin_dir_path(__FILE__));
+define(__NAMESPACE__ . "\\ROOT_PLUGIN_DIR", plugin_dir_path(__FILE__));
+define(__NAMESPACE__ . "\\PLUGIN_BASENAME", plugin_basename(__FILE__));
 
 /** @noinspection PhpIncludeInspection */
 require ROOT_PLUGIN_DIR . 'vendor/autoload.php';

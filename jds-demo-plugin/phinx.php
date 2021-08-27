@@ -9,11 +9,12 @@
 global $wpdb;
 
 if (null === $wpdb) {
+    // TODO test environment support (mock $wpdb?)
     /** @noinspection PhpUnhandledExceptionInspection */
     throw new Exception("Migrations must be run within WordPress");
 }
 
-$hostComponents = split(':', DB_HOST);
+$hostComponents = explode(':', DB_HOST);
 
 if (count($hostComponents) > 2) {
     /** @noinspection PhpUnhandledExceptionInspection */
@@ -27,7 +28,7 @@ return
         'seeds' => __DIR__ . '/db/seeds',
     ],
     'environments' => [
-        'default_migration_table' => $wpdb->get_blog_prefix() . 'jds-demo-plugin-migrations',
+        'default_migration_table' => $wpdb->get_blog_prefix() . 'jdsdp_migrations',
         'default_environment' => 'wordpress',
         'wordpress' => [
             'adapter' => 'mysql',

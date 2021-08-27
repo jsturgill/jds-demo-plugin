@@ -8,9 +8,13 @@ use JdsDemoPlugin\Config\ConfigFactory;
 use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Config\TwigTextExtractorConfig;
 use JdsDemoPlugin\Plugin;
-use JdsDemoPlugin\Services\Persistence\MigrationManager;
-use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
-use JdsDemoPlugin\WordPressApi\WordPressMenuFactory;
+use JdsDemoPlugin\Services\Persistence\IMigrationManagerFactory;
+use JdsDemoPlugin\Services\Persistence\MigrationManagerFactory;
+use JdsDemoPlugin\WordPressApi\IMenuFactory;
+use JdsDemoPlugin\WordPressApi\IPluginLifecycleActionFactory;
+use JdsDemoPlugin\WordPressApi\MenuFactory;
+use JdsDemoPlugin\WordPressApi\PluginBaseName;
+use JdsDemoPlugin\WordPressApi\PluginLifecycleActionFactory;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
@@ -38,7 +42,7 @@ class DependencyContainerFactory
         $rootPluginPath = $rootPluginPath ?? dirname((__DIR__), 2);
 
         // force a trailing slash
-        $rootPluginPath = rtrim($rootPluginPath, FileSystem::PATH_SEPARATORS) . "/";
+        $rootPluginPath = rtrim($rootPluginPath, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
 
         $containerBuilder = new DI\ContainerBuilder();
 
@@ -52,6 +56,7 @@ class DependencyContainerFactory
             'paths.pluginRoot' => $rootPluginPath,
             'paths.loggingFolder' => $rootPluginPath . self::LOG_PATH_PARTIAL . DIRECTORY_SEPARATOR,
             'paths.phinxConfig' => $rootPluginPath . 'phinx.php',
+            'paths.pluginFile' => $rootPluginPath . Plugin::PLUGIN_FILE_NAME,
             'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
             'keys.environment' => $env,
             'keys.productionEnvironment' => self::ENV_PROD,
@@ -197,11 +202,13 @@ class DependencyContainerFactory
                 return $twig;
             },
             TwigTextExtractor::class => DI\autowire(TwigTextExtractor::class),
-            IWordPressMenuFactory::class => DI\autowire(WordPressMenuFactory::class),
+            IMenuFactory::class => DI\autowire(MenuFactory::class),
+            PluginBaseName::class => DI\create(PluginBaseName::class)->constructor(DI\get('paths.pluginFile')),
             Plugin::class => DI\autowire(Plugin::class),
             FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true),
-            MigrationManager::class => DI\autowire(MigrationManager::class)
-                ->constructorParameter('phinxConfigPath', DI\get('paths.phinxConfig')),
+            IMigrationManagerFactory::class => DI\autowire(MigrationManagerFactory::class)
+                ->constructorParameter('configPath', DI\get('paths.phinxConfig')),
+            IPluginLifecycleActionFactory::class => DI\autowire(PluginLifecycleActionFactory::class)
         ]);
 
         return $containerBuilder->build();

@@ -18,9 +18,8 @@ class MigrationManager
         $this->phinxApp->setOption(self::OPT_CONFIG, $this->configPath);
     }
 
-    public function migrate(): void
+    public function migrate(): string
     {
-        $result = $this->phinxApp->getMigrate();
-        echo $result;
+        return $this->phinxApp->getMigrate();
     }
 }
