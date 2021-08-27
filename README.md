@@ -2,7 +2,7 @@
 
 Below are instructions on how to get the dev environment up and running.
 
-The commands should work in Linux or Windows under git bash -- and if they do not, it should be straightforward for you
+The commands were tested under Windows git bash. It should be straightforward for you
 to adjust as necessary for your environment.
 
 Note: Docker compose is required.
@@ -12,10 +12,10 @@ Note: Docker compose is required.
 To get started:
 
 1. copy `.env.template` to `.env` and update any values, then
-2. run `init.sh` to download WordPress and stage the plugin files. Finally,
+2. run `init.sh` to download WordPress, run docker install, and stage some files. Finally,
 3. execute `docker compose up`.
 
-## Dev-Utils
+## Dev-Utils Setup
 
 The example commands in this documentation expect certain `phar` files to exist in `dev-utils`.
 
@@ -46,6 +46,7 @@ php jds-demo-plugin/tasks/extract-twig-text.php
 ## Static Analysis
 
 ```bash
+# PHPStan
 ./dev-utils/phpstan/vendor/bin/phpstan analyse --memory-limit 1G
 
 # Psalm
