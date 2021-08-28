@@ -4,12 +4,17 @@ namespace JdsDemoPlugin\Services;
 
 use DI;
 use Exception;
+use JdsDemoPlugin\Plugin;
+use JdsDemoPlugin\Services\Persistence\IMigrationManagerFactory;
+use JdsDemoPlugin\Services\Persistence\MigrationManagerFactory;
 use JdsDemoPlugin\Config\ConfigFactory;
 use JdsDemoPlugin\Config\TemplateConfig;
-use JdsDemoPlugin\Config\TwigTextExtractorConfig;
-use JdsDemoPlugin\Plugin;
-use JdsDemoPlugin\WordPressApi\Interfaces\IWordPressMenuFactory;
-use JdsDemoPlugin\WordPressApi\WordPressMenuFactory;
+use JdsDemoPlugin\Services\TwigTextExtractor\TwigTextExtractorConfig;
+use JdsDemoPlugin\WordPressApi\IMenuFactory;
+use JdsDemoPlugin\WordPressApi\IPluginLifecycleActionFactory;
+use JdsDemoPlugin\WordPressApi\MenuFactory;
+use JdsDemoPlugin\WordPressApi\PluginBaseName;
+use JdsDemoPlugin\WordPressApi\PluginLifecycleActionFactory;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
@@ -37,7 +42,7 @@ class DependencyContainerFactory
         $rootPluginPath = $rootPluginPath ?? dirname((__DIR__), 2);
 
         // force a trailing slash
-        $rootPluginPath = rtrim($rootPluginPath, FileSystem::PATH_SEPARATORS) . "/";
+        $rootPluginPath = rtrim($rootPluginPath, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
 
         $containerBuilder = new DI\ContainerBuilder();
 
@@ -50,14 +55,14 @@ class DependencyContainerFactory
         $containerBuilder->addDefinitions([
             'paths.pluginRoot' => $rootPluginPath,
             'paths.loggingFolder' => $rootPluginPath . self::LOG_PATH_PARTIAL . DIRECTORY_SEPARATOR,
+            'paths.phinxConfig' => $rootPluginPath . 'phinx.php',
+            'paths.pluginFile' => $rootPluginPath . Plugin::PLUGIN_FILE_NAME,
             'keys.translationDomain' => Plugin::TRANSLATION_DOMAIN,
             'keys.environment' => $env,
             'keys.productionEnvironment' => self::ENV_PROD,
             'keys.testEnvironment' => self::ENV_TEST,
             ConfigFactory::class => function (ContainerInterface $c) {
-                /** @var FileSystem $fileSystem */
-                $fileSystem = $c->get(FileSystem::class);
-                return new ConfigFactory($fileSystem, (string)$c->get('paths.pluginRoot'), (string)$c->get('keys.translationDomain'));
+                return new ConfigFactory((string)$c->get('paths.pluginRoot'), (string)$c->get('keys.translationDomain'));
             },
             TemplateConfig::class => function (ContainerInterface $c) {
                 /** @var ConfigFactory $configFactory */
@@ -195,9 +200,17 @@ class DependencyContainerFactory
                 return $twig;
             },
             TwigTextExtractor::class => DI\autowire(TwigTextExtractor::class),
-            IWordPressMenuFactory::class => DI\autowire(WordPressMenuFactory::class),
+            IMenuFactory::class => DI\autowire(MenuFactory::class),
+            PluginBaseName::class => DI\create(PluginBaseName::class)->constructor(DI\get('paths.pluginFile')),
             Plugin::class => DI\autowire(Plugin::class),
-            FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true)
+            FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true),
+            IMigrationManagerFactory::class => DI\autowire(MigrationManagerFactory::class)
+                ->constructorParameter('defaultConfig', function (ContainerInterface $c) {
+                    /** @var ConfigFactory $configFactory */
+                    $configFactory = $c->get(ConfigFactory::class);
+                    return $configFactory->createMigrationConfig();
+                }),
+            IPluginLifecycleActionFactory::class => DI\autowire(PluginLifecycleActionFactory::class)
         ]);
 
         return $containerBuilder->build();

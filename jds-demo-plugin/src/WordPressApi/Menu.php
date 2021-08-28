@@ -4,7 +4,7 @@ namespace JdsDemoPlugin\WordPressApi;
 
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 
-class WordPressMenu
+class Menu
 {
     public string $parentSlug;
     public string $pageTitle;
@@ -44,9 +44,7 @@ class WordPressMenu
         $this->renderFunction = $renderFunction;
         $this->position       = $position;
 
-        /** @noinspection PhpUndefinedFunctionInspection */
         add_action("admin_menu", function () {
-            /** @noinspection PhpUndefinedFunctionInspection */
             $result      = add_submenu_page(
                 $this->parentSlug,
                 $this->pageTitle,

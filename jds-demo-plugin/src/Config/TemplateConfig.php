@@ -11,7 +11,7 @@ class TemplateConfig
 
     public function __construct(string $templateRootPath, string $templateCachePath)
     {
-        $this->templateRootPath  = rtrim($templateRootPath, FileSystem::PATH_SEPARATORS);
-        $this->templateCachePath = rtrim($templateCachePath, FileSystem::PATH_SEPARATORS);
+        $this->templateRootPath  = rtrim($templateRootPath, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
+        $this->templateCachePath = rtrim($templateCachePath, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
     }
 }

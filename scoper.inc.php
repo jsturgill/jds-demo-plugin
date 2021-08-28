@@ -7,6 +7,17 @@ require_once 'scoper-fixes/twigPatcher.php';
 use Isolated\Symfony\Component\Finder\Finder;
 use function JdsDemoPlugin\Patchers\twigPatcher;
 
+$polyfillsBootstraps = array_keys(iterator_to_array(Finder::create()
+    ->files()
+    ->in('./jds-demo-plugin/vendor/symfony/polyfill-*')
+    ->name('bootstrap.php')));
+
+$polyfillsStubs = array_keys(iterator_to_array(Finder::create()
+    ->files()
+    ->in('./jds-demo-plugin/vendor/symfony/polyfill-*/Resources/stubs')
+    ->name('*.php')));
+
+
 return [
     // The prefix configuration. If a non null value will be used, a random prefix will be generated.
     'prefix' => 'JdsDesigns\Release',
@@ -21,9 +32,10 @@ return [
             './jds-demo-plugin/tasks',
             './jds-demo-plugin/languages',
             './jds-demo-plugin/templates',
-            './jds-demo-plugin/logs'
+            './jds-demo-plugin/logs',
+            './jds-demo-plugin/db'
             ])->notName(['*.log']),
-        Finder::create()->files()->in('./jds-demo-plugin')->name(['jsd-demo-plugin.php']),
+        Finder::create()->files()->in('./jds-demo-plugin')->name(['jds-demo-plugin.php', 'phinx.wordpress.php']),
         Finder::create()
             ->files()
             ->ignoreVCS(true)
@@ -46,7 +58,10 @@ return [
     // a file untouched.
     // Paths are relative to the configuration file unless if they are already absolute
     'files-whitelist' => [
-        './jds-demo-plugin/vendor/php-di/php-di/src/Compiler/Template.php'
+        ...$polyfillsBootstraps,
+        ...$polyfillsStubs,
+        './jds-demo-plugin/vendor/php-di/php-di/src/Compiler/Template.php',
+        './jds-demo-plugin/phinx.php'
     ],
 
     // When scoping PHP files, there will be scenarios where some of the code being scoped indirectly references the
@@ -69,6 +84,7 @@ return [
     //
     // Fore more see https://github.com/humbug/php-scoper#whitelist
     'whitelist' => [
+        'Symfony\\Polyfill\\*',
         // 'PHPUnit\Framework\TestCase',   // A specific class
         // 'PHPUnit\Framework\*',          // The whole namespace
         // '*',                            // Everything

@@ -6,5 +6,6 @@ parameters:
 		- stubs/Node.stub
 	scanDirectories:
 	 	- jds-demo-plugin/vendor
+	 	- jds-demo-plugin/src
 includes:
 	- dev-utils/phpstan/vendor/szepeviktor/phpstan-wordpress/extension.neon

@@ -1,10 +1,10 @@
 <?php
 
-namespace JdsDemoPlugin\WordPressApi\Interfaces;
+namespace JdsDemoPlugin\WordPressApi;
 
-use JdsDemoPlugin\WordPressApi\WordPressMenu;
+use JdsDemoPlugin\WordPressApi\Menu;
 
-interface IWordPressMenuFactory
+interface IMenuFactory
 {
     /**
      * @param string $parentSlug
@@ -15,7 +15,7 @@ interface IWordPressMenuFactory
      * @param callable():void $renderFunction
      * @param int|null $position
      *
-     * @return WordPressMenu
+     * @return Menu
      */
     public function createMenuWithRenderCallback(
         string   $parentSlug,
@@ -25,7 +25,7 @@ interface IWordPressMenuFactory
         string   $menuSlug,
         callable $renderFunction,
         int      $position = null
-    ): WordPressMenu;
+    ): Menu;
 
     /**
      * @param string $parentSlug
@@ -37,7 +37,7 @@ interface IWordPressMenuFactory
      * @param callable():array<string,mixed> $environmentFactory returns an array to be used as the template context
      * @param int|null $position
      *
-     * @return WordPressMenu
+     * @return Menu
      */
     public function createMenuWithTemplate(
         string   $parentSlug,
@@ -48,5 +48,5 @@ interface IWordPressMenuFactory
         string   $templateName,
         callable $environmentFactory,
         int      $position = null
-    ): WordPressMenu;
+    ): Menu;
 }
