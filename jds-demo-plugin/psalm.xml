@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <psalm
-		errorLevel="2"
+		errorLevel="1"
 		resolveFromConfigFile="true"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns="https://getpsalm.org/schema/config"
@@ -17,4 +17,23 @@
 	<plugins>
 		<pluginClass class="PsalmWordPress\Plugin"/>
 	</plugins>
+	<issueHandlers>
+		<MixedInferredReturnType>
+			<errorLevel type="suppress">
+				<!-- remove this if createMigrationConfig is modified to function differently -->
+				<file name="src/Config/ConfigFactory.php" />
+			</errorLevel>
+		</MixedInferredReturnType>
+		<MixedReturnStatement>
+			<errorLevel type="suppress">
+				<!-- remove this if createMigrationConfig is modified to function differently -->
+				<file name="src/Config/ConfigFactory.php" />
+			</errorLevel>
+		</MixedReturnStatement>
+		<UnresolvableInclude>
+			<errorLevel type="suppress">
+				<file name="src/Config/ConfigFactory.php" />
+			</errorLevel>
+		</UnresolvableInclude>
+	</issueHandlers>
 </psalm>

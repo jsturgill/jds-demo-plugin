@@ -35,7 +35,7 @@ return [
             './jds-demo-plugin/logs',
             './jds-demo-plugin/db'
             ])->notName(['*.log']),
-        Finder::create()->files()->in('./jds-demo-plugin')->name(['jds-demo-plugin.php', 'phinx.php']),
+        Finder::create()->files()->in('./jds-demo-plugin')->name(['jds-demo-plugin.php', 'phinx.wordpress.php']),
         Finder::create()
             ->files()
             ->ignoreVCS(true)

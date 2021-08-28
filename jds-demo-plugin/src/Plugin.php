@@ -43,7 +43,10 @@ class Plugin
             $pluginLifecycleActionFactory->createAction(
                 (string)$this->pluginBaseName,
                 PluginLifecycleAction::STAGE_ACTIVATION,
-                [$this, 'migrate']
+                function () {
+                    $this->logger->notice('plugin activated');
+                    $this->migrate();
+                }
             )
         );
 
@@ -83,7 +86,7 @@ class Plugin
     public function migrate(): void
     {
         $output = $this->migrationManagerFactory->create()->migrate();
-        $this->logger->notice("migration attempted", ['output' => $output]);
+        $this->logger->notice("migration attempted", ['result (true === success)' => $output]);
     }
 
     public function getOptionsMenu(): Menu

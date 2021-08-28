@@ -7,7 +7,7 @@ interface IMigrationManagerFactory
     /**
      * @param ?array<string,mixed> $config
      * @param ?string $env
-     * @return MigrationManager
+     * @return IMigrationManager
      */
-    public function create(array $config = null, string $env = null): IMigrationManager;
+    public function create(array $config = null, ?string $env = null): IMigrationManager;
 }

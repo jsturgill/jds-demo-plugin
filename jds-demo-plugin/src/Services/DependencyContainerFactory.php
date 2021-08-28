@@ -62,8 +62,6 @@ class DependencyContainerFactory
             'keys.productionEnvironment' => self::ENV_PROD,
             'keys.testEnvironment' => self::ENV_TEST,
             ConfigFactory::class => function (ContainerInterface $c) {
-                /** @var FileSystem $fileSystem */
-
                 return new ConfigFactory((string)$c->get('paths.pluginRoot'), (string)$c->get('keys.translationDomain'));
             },
             TemplateConfig::class => function (ContainerInterface $c) {
@@ -207,7 +205,11 @@ class DependencyContainerFactory
             Plugin::class => DI\autowire(Plugin::class),
             FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true),
             IMigrationManagerFactory::class => DI\autowire(MigrationManagerFactory::class)
-                ->constructorParameter('defaultConfig', DI\get(ConfigFactory::class)),
+                ->constructorParameter('defaultConfig', function (ContainerInterface $c) {
+                    /** @var ConfigFactory $configFactory */
+                    $configFactory = $c->get(ConfigFactory::class);
+                    return $configFactory->createMigrationConfig();
+                }),
             IPluginLifecycleActionFactory::class => DI\autowire(PluginLifecycleActionFactory::class)
         ]);
 

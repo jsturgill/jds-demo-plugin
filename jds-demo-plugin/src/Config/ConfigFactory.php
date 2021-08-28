@@ -13,9 +13,9 @@ class ConfigFactory
     public const PATH_PARTIAL_TEMPLATES = "templates";
     public const PATH_PARTIAL_CACHE_ROOT = "cache";
     public const PATH_PARTIAL_MIGRATION_CONFIG = "phinx.wordpress.php";
-    public const PATH_PARTIAL_TEMPLATE_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/templates";
-    public const PATH_PARTIAL_DI_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/di";
-    public const PATH_PARTIAL_TWIG_TEXT_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/gettext";
+    public const PATH_PARTIAL_TEMPLATE_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . DIRECTORY_SEPARATOR . "templates";
+    public const PATH_PARTIAL_DI_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . DIRECTORY_SEPARATOR . "di";
+    public const PATH_PARTIAL_TWIG_TEXT_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . DIRECTORY_SEPARATOR . "gettext";
 
     private string $pluginRootPath;
     private string $translationDomain;
@@ -31,30 +31,31 @@ class ConfigFactory
         $this->translationDomain = $translationDomain;
     }
 
+    /**
+     * @return array<string,mixed>
+     */
     public function createMigrationConfig(): array
     {
+        // modify psalm.xml if this is updated to something more typesafe
         return require($this->pluginRootPath . ConfigFactory::PATH_PARTIAL_MIGRATION_CONFIG);
     }
 
     /**
-     *
-     * @psalm-suppress UnusedParam
      * @template T of object
      * @param class-string<T> $className
-     * @param string $key
      * @param callable():T $callback
      *
      * @return T
      */
-    private function getOrCache(string $className, string $key, callable $callback): object
+    private function getOrCache(string $className, callable $callback): object
     {
-        if (!array_key_exists($key, $this->cache)) {
+        if (!array_key_exists($className, $this->cache)) {
             $instance = $callback();
-            $this->cache[$key] = $instance;
+            $this->cache[$className] = $instance;
         }
 
         /** @var T */
-        return $this->cache[$key];
+        return $this->cache[$className];
     }
 
     public function createTemplateConfig(): TemplateConfig
@@ -63,7 +64,6 @@ class ConfigFactory
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
         $result = $this->getOrCache(
             TemplateConfig::class,
-            'templateConfig',
             fn () => new TemplateConfig(
                 $this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TEMPLATES,
                 $this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TEMPLATE_CACHE
@@ -79,7 +79,6 @@ class ConfigFactory
         /** @noinspection PhpUnnecessaryLocalVariableInspection */
         $result = $this->getOrCache(
             TwigTextExtractorConfig::class,
-            'twigTextExtractionConfig',
             fn () => new TwigTextExtractorConfig(
                 $this->createTemplateConfig(),
                 $this->pluginRootPath . ConfigFactory::PATH_PARTIAL_TWIG_TEXT_CACHE,
