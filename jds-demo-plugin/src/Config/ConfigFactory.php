@@ -3,11 +3,16 @@
 namespace JdsDemoPlugin\Config;
 
 use JdsDemoPlugin\Services\FileSystem;
+use JdsDemoPlugin\Services\TwigTextExtractor\TwigTextExtractorConfig;
+
+// TODO interface for ConfigFactory
+// TODO BaseConfig class that includes separate, granular values for project root, templates root, cache root, etc.
 
 class ConfigFactory
 {
     public const PATH_PARTIAL_TEMPLATES = "templates";
     public const PATH_PARTIAL_CACHE_ROOT = "cache";
+    public const PATH_PARTIAL_MIGRATION_CONFIG = "phinx.wordpress.php";
     public const PATH_PARTIAL_TEMPLATE_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/templates";
     public const PATH_PARTIAL_DI_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/di";
     public const PATH_PARTIAL_TWIG_TEXT_CACHE = ConfigFactory::PATH_PARTIAL_CACHE_ROOT . "/gettext";
@@ -20,10 +25,15 @@ class ConfigFactory
      */
     private array $cache = [];
 
-    public function __construct(FileSystem $fileSystem, string $rootPluginPath, string $translationDomain)
+    public function __construct(string $rootPluginPath, string $translationDomain)
     {
-        $this->pluginRootPath = $fileSystem->forceTrailingSlash($rootPluginPath);
+        $this->pluginRootPath = rtrim($rootPluginPath, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
         $this->translationDomain = $translationDomain;
+    }
+
+    public function createMigrationConfig(): array
+    {
+        return require($this->pluginRootPath . ConfigFactory::PATH_PARTIAL_MIGRATION_CONFIG);
     }
 
     /**

@@ -8,9 +8,9 @@
 
 namespace JdsDemoPlugin\Cli;
 
-use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Services\DependencyContainerFactory;
 use JdsDemoPlugin\Services\FileSystem;
+use JdsDemoPlugin\Services\TwigTextExtractor\TemplateConfig;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
 

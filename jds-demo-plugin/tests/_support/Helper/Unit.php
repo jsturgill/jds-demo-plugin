@@ -26,6 +26,11 @@ class Unit extends Module
         return dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . Unit::FILES_PATH_PARTIAL;
     }
 
+    public function getPluginRoot(): string
+    {
+        return dirname(__DIR__, 3);
+    }
+
     public function getTestFilePath(string $partial): string
     {
         return $this->getTestFilesRoot() . DIRECTORY_SEPARATOR . $partial;

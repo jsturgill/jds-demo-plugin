@@ -4,12 +4,12 @@ namespace JdsDemoPlugin\Services;
 
 use DI;
 use Exception;
-use JdsDemoPlugin\Config\ConfigFactory;
-use JdsDemoPlugin\Config\TemplateConfig;
-use JdsDemoPlugin\Config\TwigTextExtractorConfig;
 use JdsDemoPlugin\Plugin;
 use JdsDemoPlugin\Services\Persistence\IMigrationManagerFactory;
 use JdsDemoPlugin\Services\Persistence\MigrationManagerFactory;
+use JdsDemoPlugin\Config\ConfigFactory;
+use JdsDemoPlugin\Config\TemplateConfig;
+use JdsDemoPlugin\Services\TwigTextExtractor\TwigTextExtractorConfig;
 use JdsDemoPlugin\WordPressApi\IMenuFactory;
 use JdsDemoPlugin\WordPressApi\IPluginLifecycleActionFactory;
 use JdsDemoPlugin\WordPressApi\MenuFactory;
@@ -63,8 +63,8 @@ class DependencyContainerFactory
             'keys.testEnvironment' => self::ENV_TEST,
             ConfigFactory::class => function (ContainerInterface $c) {
                 /** @var FileSystem $fileSystem */
-                $fileSystem = $c->get(FileSystem::class);
-                return new ConfigFactory($fileSystem, (string)$c->get('paths.pluginRoot'), (string)$c->get('keys.translationDomain'));
+
+                return new ConfigFactory((string)$c->get('paths.pluginRoot'), (string)$c->get('keys.translationDomain'));
             },
             TemplateConfig::class => function (ContainerInterface $c) {
                 /** @var ConfigFactory $configFactory */
@@ -207,7 +207,7 @@ class DependencyContainerFactory
             Plugin::class => DI\autowire(Plugin::class),
             FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true),
             IMigrationManagerFactory::class => DI\autowire(MigrationManagerFactory::class)
-                ->constructorParameter('configPath', DI\get('paths.phinxConfig')),
+                ->constructorParameter('defaultConfig', DI\get(ConfigFactory::class)),
             IPluginLifecycleActionFactory::class => DI\autowire(PluginLifecycleActionFactory::class)
         ]);
 

@@ -3,11 +3,11 @@
 namespace JdsDemoPlugin\Services;
 
 use Exception;
-use JdsDemoPlugin\Config\TwigTextExtractorConfig;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\TwigTextExtractor\ArgumentFactory;
 use JdsDemoPlugin\Services\TwigTextExtractor\IArgument;
+use JdsDemoPlugin\Services\TwigTextExtractor\TwigTextExtractorConfig;
 use SplFileInfo;
 use Twig\Environment;
 use Twig\Error\SyntaxError;

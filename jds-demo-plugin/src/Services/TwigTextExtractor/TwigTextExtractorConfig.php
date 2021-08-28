@@ -1,7 +1,8 @@
 <?php
 
-namespace JdsDemoPlugin\Config;
+namespace JdsDemoPlugin\Services\TwigTextExtractor;
 
+use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\FileSystem;
 
@@ -15,8 +16,8 @@ class TwigTextExtractorConfig
 
     public function __construct(TemplateConfig $templateConfig, string $outputDir, string $translationDomain)
     {
-        $this->outputDir = rtrim($outputDir, FileSystem::PATH_SEPARATORS);
-        $this->inputDir = rtrim($templateConfig->templateRootPath, FileSystem::PATH_SEPARATORS);
+        $this->outputDir = rtrim($outputDir, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
+        $this->inputDir = rtrim($templateConfig->templateRootPath, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
         $this->inputPathLength = mb_strlen($templateConfig->templateRootPath);
         $this->translationDomain = $translationDomain;
     }

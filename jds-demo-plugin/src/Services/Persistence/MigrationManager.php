@@ -2,24 +2,26 @@
 
 namespace JdsDemoPlugin\Services\Persistence;
 
-use Phinx\Wrapper\TextWrapper;
+use Phinx\Migration\Manager;
 
-class MigrationManager
+class MigrationManager implements IMigrationManager
 {
-    public const OPT_CONFIG = 'configuration';
+    private string $env;
+    private Manager $manager;
 
-    private string $configPath;
-    private TextWrapper $phinxApp;
-
-    public function __construct(string $phinxConfigPath, TextWrapper $phinxApp)
+    public function __construct(string $env, Manager $manager)
     {
-        $this->phinxApp = $phinxApp;
-        $this->configPath = $phinxConfigPath;
-        $this->phinxApp->setOption(self::OPT_CONFIG, $this->configPath);
+        $this->manager = $manager;
+        $this->env = $env;
     }
 
-    public function migrate(): string
+    public function migrate(): bool
     {
-        return $this->phinxApp->getMigrate();
+        $this->manager->migrate($this->env);
+        $result = $this->manager->printStatus($this->env);
+
+        // if no true values are returned, then there are no no missing or down migrations
+        // -- so, success (return true)
+        return ! in_array(true, array_values($result), true);
     }
 }
