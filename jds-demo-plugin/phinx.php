@@ -2,6 +2,10 @@
 
 /** @noinspection PhpUndefinedConstantInspection */
 
+use JdsDemoPlugin\Exceptions\CommandFailureException;
+
+require_once(__DIR__ . '/vendor/autoload.php');
+
 /**
  * Phinx config file
  */
@@ -11,7 +15,7 @@ global $wpdb;
 if (null === $wpdb) {
     // TODO test environment support (mock $wpdb?)
     /** @noinspection PhpUnhandledExceptionInspection */
-    throw new Exception("Migrations must be run within WordPress");
+    throw new CommandFailureException("Migrations must be run within WordPress");
 }
 
 $hostComponents = explode(':', DB_HOST);
