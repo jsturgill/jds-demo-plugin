@@ -2,6 +2,8 @@
 
 namespace JdsDemoPlugin;
 
+use JdsDemoPlugin\Exceptions\CommandFailureException;
+use JdsDemoPlugin\Services\Persistence\IMigrationManager;
 use JdsDemoPlugin\Services\Persistence\IMigrationManagerFactory;
 use JdsDemoPlugin\WordPressApi\IMenuFactory;
 use JdsDemoPlugin\WordPressApi\IPluginLifecycleActionFactory;
@@ -25,13 +27,14 @@ class Plugin
     private Menu $optionsMenu;
     private PluginBaseName $pluginBaseName;
     private LoggerInterface $logger;
+    private IMigrationManager $migrationManager;
 
     public function __construct(
-        PluginBaseName $pluginBaseName,
-        IMenuFactory $menuFactory,
+        PluginBaseName                $pluginBaseName,
+        IMenuFactory                  $menuFactory,
         IPluginLifecycleActionFactory $pluginLifecycleActionFactory,
-        IMigrationManagerFactory $migrationManagerFactory,
-        LoggerInterface $logger
+        IMigrationManagerFactory      $migrationManagerFactory,
+        LoggerInterface               $logger
     ) {
         $this->logger = $logger;
         $this->pluginBaseName = $pluginBaseName;
@@ -45,7 +48,10 @@ class Plugin
                 PluginLifecycleAction::STAGE_ACTIVATION,
                 function () {
                     $this->logger->notice('plugin activated');
-                    $this->migrate();
+                    $result = $this->migrateAndSeed();
+                    if (false === $result) {
+                        throw new CommandFailureException("Unable to stage required database changes. Check log for details.");
+                    }
                 }
             )
         );
@@ -56,7 +62,7 @@ class Plugin
             $pluginLifecycleActionFactory->createAction(
                 (string)$this->pluginBaseName,
                 PluginLifecycleAction::STAGE_DEACTIVATION,
-                fn () =>$this->logger->notice("plugin deactivated")
+                fn () => $this->logger->notice("plugin deactivated")
             )
         );
 
@@ -83,10 +89,21 @@ class Plugin
         );
     }
 
-    public function migrate(): void
+    /**
+     * @return bool true if both migration and seeding go off without a hitch
+     */
+    public function migrateAndSeed(): bool
     {
-        $output = $this->migrationManagerFactory->create()->migrate();
-        $this->logger->notice("migration attempted", ['result (true === success)' => $output]);
+        // TODO display some sort of warning / message if this fails -- take additional action as well?
+        $this->migrationManager ??= $this->migrationManagerFactory->create();
+        $result = $this->migrationManager->migrate();
+        $this->logger->notice("migration attempted", ['result (true === success)' => $result]);
+        if (true !== $result) {
+            return false;
+        }
+        $result = $this->migrationManager->seed();
+        $this->logger->notice('database seed operation attempted', ['result (true === success)' => $result]);
+        return $result;
     }
 
     public function getOptionsMenu(): Menu
