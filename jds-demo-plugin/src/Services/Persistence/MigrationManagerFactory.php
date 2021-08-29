@@ -6,6 +6,7 @@ use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\TwigTextExtractor\ConfigFactory;
 use Phinx\Config\Config;
 use Phinx\Migration\Manager;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\NullOutput;
 
@@ -18,13 +19,15 @@ class MigrationManagerFactory implements IMigrationManagerFactory
      * @var array<string,mixed>
      */
     private array $defaultConfig;
+    private LoggerInterface $logger;
 
     /**
      * @param array<string,mixed> $defaultConfig
      */
-    public function __construct(array $defaultConfig)
+    public function __construct(array $defaultConfig, LoggerInterface $logger)
     {
         $this->defaultConfig = $defaultConfig;
+        $this->logger = $logger;
     }
 
     /**
@@ -49,6 +52,6 @@ class MigrationManagerFactory implements IMigrationManagerFactory
         $configInstance = new Config($config);
         $manager = new Manager($configInstance, new StringInput(''), new NullOutput());
 
-        return new MigrationManager($env, $manager);
+        return new MigrationManager($env, $manager, $this->logger);
     }
 }
