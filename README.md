@@ -81,6 +81,5 @@ To build:
 To test drive the build on localhost:
 
 ```bash
-# within the project root (NOT ./jds-demo-plugin)
 ./test-drive-release.sh
 ```
