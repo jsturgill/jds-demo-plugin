@@ -83,3 +83,12 @@ To test drive the build on localhost:
 ```bash
 ./test-drive-release.sh
 ```
+
+## Clean Start
+
+To blow away docker resources related to this project:
+
+```bash
+# specify the relevant .yml file
+docker compose -f docker-compose.dev.yml down --rmi all --volumes
+```
