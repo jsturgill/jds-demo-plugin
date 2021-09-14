@@ -21,8 +21,3 @@ wp core install --url="$URL" --title="$TITLE" --admin_user="$ADMIN_USER" --admin
 
 echo "activating plugin"
 wp plugin activate jds-demo-plugin --path=/var/www/html --allow-root
-
-#cd /var/www/html || exit
-echo "starting PHP FPM"
-php-fpm
-sleep infinite

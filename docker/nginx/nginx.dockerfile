@@ -1,5 +1,5 @@
 FROM nginx:stable-alpine
 
-ADD ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+ADD ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
-COPY ./docker/files/wordpress /var/www/html
+COPY ./files/wordpress /var/www/html

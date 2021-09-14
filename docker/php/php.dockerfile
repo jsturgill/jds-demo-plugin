@@ -23,7 +23,7 @@ ENV ADMIN_EMAIL=$admin_email
 # see https://github.com/wp-cli/wp-cli/issues/3840
 ENV PAGER=more
 
-ADD ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+ADD ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 RUN addgroup -g 1000 wordpress && adduser -G wordpress -g wordpress -s /bin/sh -D wordpress
 
@@ -36,14 +36,17 @@ WORKDIR /var/www/html
 RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
 
 # mariadb-connector-c adds caching_sha2_password see https://github.com/craftcms/docker/issues/19
-# and bash is added for wait-for-it.sh
-RUN apk add mysql-client mariadb-connector-c bash
+RUN apk add mysql-client mariadb-connector-c
 
 RUN curl https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp \
-    && chmod +x /usr/local/bin/wp
+    && chmod +x /usr/local/bin/wp \
+    && curl https://getcomposer.org/download/latest-stable/composer.phar -o /usr/local/bin/composer \
+    && chmod +x /usr/local/bin/composer \
+    && curl https://codeception.com/codecept.phar -o /usr/local/bin/codecept \
+    && chmod +x /usr/local/bin/codecept
 
-COPY ./docker/scripts /var/scripts
+COPY ./scripts /var/scripts
 
-COPY ./docker/files/wordpress /var/www/html
+COPY ./files/wordpress /var/www/html
 
-CMD sh -c "/var/scripts/init.sh"
+CMD sh -c "/var/scripts/init-wp.sh" && sh -c "/var/scripts/start-php.sh"

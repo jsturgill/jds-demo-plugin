@@ -3,11 +3,11 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: ./docker/nginx/nginx.dockerfile
+      dockerfile: ./nginx/nginx.dockerfile
     ports:
       - ${LOCAL_HTTP_PORT}:80
     volumes:
-      - ./jds-demo-plugin:/var/www/html/wp-content/plugins/jds-demo-plugin
+      - ../jds-demo-plugin:/var/www/html/wp-content/plugins/jds-demo-plugin
     depends_on:
       - php
       - mysql
@@ -26,7 +26,7 @@ services:
       - mysql
     build:
       context: .
-      dockerfile: ./docker/php/php.dockerfile
+      dockerfile: ./php/php.dockerfile
       args:
         dbname: ${MYSQL_DATABASE}
         dbuser: ${MYSQL_USER}
@@ -38,4 +38,4 @@ services:
         admin_password: ${ADMIN_PASSWORD}
         admin_email: ${ADMIN_EMAIL}
     volumes:
-      - ./jds-demo-plugin:/var/www/html/wp-content/plugins/jds-demo-plugin
+      - ../jds-demo-plugin:/var/www/html/wp-content/plugins/jds-demo-plugin

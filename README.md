@@ -5,19 +5,20 @@ Below are instructions on how to get the dev environment up and running.
 The commands were tested under Windows git bash. It should be straightforward for you
 to adjust as necessary for your environment.
 
-Note: Docker compose is required.
+Note: Docker compose is required, as is PHP 7.4 or greater.
 
 ## Local Dev Environment
 
 To get started:
 
-1. copy `.env.template` to `.env` and update any values, then
-2. run `init.sh` to download WordPress, run docker install, and stage some files. Finally,
-3. execute `docker compose up`.
+1. copy `docker/.env.template` to `docker/.env` and (optionally) update any values you like, then
+2. run `init.sh` to do some housekeeping. Finally,
+3. execute `docker compose -f docker/docker-compose.yml up`.
 
 ## Dev-Utils Setup
 
-The example commands in this documentation expect certain `phar` files to exist in `dev-utils`.
+The example commands in this documentation expect `dev-utils` to be initialized by downloading
+certain `.phar` files and loading .
 
 Run the following command to download them:
 
@@ -27,10 +28,17 @@ Run the following command to download them:
 
 ## Tests
 
-To run tests:
+To run tests locally:
 
 ```bash
 ./jds-demo-plugin/vendor/bin/codecept -c jds-demo-plugin run
+```
+
+or within docker (preferred):
+
+```bash
+# note: call with the "down" command to reset images (e.g. fresh MySQL state)
+docker-compose -f docker/docker-compose.yml -f docker/docker-compose.tests.yml up --abort-on-container-exit --exit-code-from php
 ```
 
 ## Updating the .pot file
@@ -89,6 +97,10 @@ To test drive the build on localhost:
 To blow away docker resources related to this project:
 
 ```bash
-# specify the relevant .yml file
-docker compose -f docker-compose.dev.yml down --rmi all --volumes
+# specify the relevant .yml file and call the "down" command
+docker compose -f docker/docker-compose.yml down
+
+# to completely reset:
+
+docker compose -f docker/docker-compose.yml down --rmi all --volumes
 ```
