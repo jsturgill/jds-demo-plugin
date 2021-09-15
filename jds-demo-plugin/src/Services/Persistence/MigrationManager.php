@@ -21,12 +21,17 @@ class MigrationManager implements IMigrationManager
 
     public function migrate(): bool
     {
-        $this->manager->migrate($this->env);
-        $result = $this->manager->printStatus($this->env);
+        try {
+            $this->manager->migrate($this->env);
+            $result = $this->manager->printStatus($this->env);
 
-        // if no true values are returned, then there are no no missing or down migrations
-        // -- so, success (return true)
-        return ! in_array(true, array_values($result), true);
+            // if no true values are returned, then there are no no missing or down migrations
+            // -- so, success (return true)
+            return !in_array(true, array_values($result), true);
+        } catch (Exception $e) {
+            $this->logger->error("migration operation failed", ['message'=> $e->getMessage(), 'trace' => $e->getTrace()]);
+            return false;
+        }
     }
 
     public function seed(): bool
