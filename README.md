@@ -36,6 +36,12 @@ or within docker (preferred):
 docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev-tests.yml up --abort-on-container-exit --exit-code-from php
 ```
 
+To create a new test:
+
+```bash
+./jds-demo-plugin/vendor/bin/codecept -c jds-demo-plugin generate:test unit FileSystem
+```
+
 ## Updating the .pot file
 
 ```bash

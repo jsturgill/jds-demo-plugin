@@ -16,10 +16,6 @@ class Unit extends Module
     public const FILES_PATH_PARTIAL = '_data';
 
     public const GOLDEN_MASTERS_PARTIAL_PATH = 'goldenMasters';
-    /**
-     * @var array<string, Container> $cache
-     */
-    private static array $cache = [];
 
     public function getTestFilesRoot(): string
     {
@@ -67,13 +63,7 @@ class Unit extends Module
     public function getDiContainer($rootPath = null): Container
     {
         $rootPath = $rootPath ?? $this->getTestFilesRoot();
-        if (array_key_exists($rootPath, Unit::$cache)) {
-            return Unit::$cache[$rootPath];
-        }
-
         $factory = new DependencyContainerFactory();
-
-        Unit::$cache[$rootPath] = $factory->create($rootPath, DependencyContainerFactory::ENV_TEST);
-        return Unit::$cache[$rootPath];
+        return $factory->create($rootPath, DependencyContainerFactory::ENV_TEST);
     }
 }
