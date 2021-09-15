@@ -6,6 +6,12 @@ SCRIPT_DIR=$(pwd)
 
 printf "executing within %s \n\n" "$SCRIPT_DIR"
 
+# dev-utils folder phars
+
+if [ ! -f "./dev-utils/composer.phar" ]; then
+	./dev-utils/fetch-phars.sh
+fi
+
 # install composer dependencies
 
 if [ ! -d "./jds-demo-plugin/vendor" ]; then
@@ -28,10 +34,6 @@ if [ ! -d "./dev-utils/scoper/vendor" ]; then
 	echo "scoper dependencies installed"
 fi
 
-if [ ! -f "./dev-utils/composer.phar" ]; then
-	$( source ./dev-utils/fetch-phars.sh )
-fi
-
 echo "all composer dependencies for development are installed"
 
 # downloads wordpress and stages the plugin files
@@ -48,4 +50,4 @@ fi
 # backticks below are not intended to execute
 # shellcheck disable=SC2016
 echo 'execute `docker compose -f docker/docker-compose.yml up` to launch, then visit localhost in your browser'
-echo '(check .env to see if you need to specify a port)'
+echo '(check docker/.env to see if you need to specify a port)'

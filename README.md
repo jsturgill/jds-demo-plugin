@@ -18,13 +18,8 @@ To get started:
 ## Dev-Utils Setup
 
 The example commands in this documentation expect `dev-utils` to be initialized by downloading
-certain `.phar` files and loading .
-
-Run the following command to download them:
-
-```bash
-./dev-utils/fetch-phars.sh
-```
+certain `.phar` files and installing composer dependencies. All of this is taken care of by 
+running `init.sh` in the root directory.
 
 ## Tests
 
@@ -38,7 +33,7 @@ or within docker (preferred):
 
 ```bash
 # note: call with the "down" command to reset images (e.g. fresh MySQL state)
-docker-compose -f docker/docker-compose.yml -f docker/docker-compose.tests.yml up --abort-on-container-exit --exit-code-from php
+docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev-tests.yml up --abort-on-container-exit --exit-code-from php
 ```
 
 ## Updating the .pot file
@@ -89,7 +84,7 @@ To build:
 To test drive the build on localhost:
 
 ```bash
-./test-drive-release.sh
+docker-compose -f docker/docker-compose.yml -f docker/docker-compose.serve-prod-build.yml up --abort-on-container-exit --exit-code-from php
 ```
 
 ## Clean Start
