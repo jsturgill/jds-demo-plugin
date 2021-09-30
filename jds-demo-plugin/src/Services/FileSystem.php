@@ -110,10 +110,24 @@ class FileSystem
         /** @var SplFileInfo $fileInfo */
         foreach ($iterator as $fileInfo) {
             if ($predicate($fileInfo) && false !== $fileInfo->getRealPath()) {
-                $result = $fileInfo->isDir()
-                    ? rmdir($fileInfo->getRealPath())
-                    : unlink($fileInfo->getRealPath());
-                if ($result !== true) {
+                if (!$fileInfo->isDir()) {
+                    $deleteWasSuccessful = unlink($fileInfo->getRealPath());
+                } else {
+                    // below may be a bit cryptic... explanation:
+                    // $iterator === RecursiveIteratorIterator
+                    // getSubIterator() === RecursiveDirectoryIterator
+                    // getChildren() === RecursiveDirectoryIterator for the current entry (and we know from the above
+                    //                   conditional that the current entry IS a directory)
+                    // valid() === returns true on DirectoryIterators and RecursiveDirectoryIterators if the directory
+                    //             contains files, false if it only contains dotfiles or directories
+                    $directoryHasChildren = $iterator->getSubIterator()->getChildren()->valid();
+
+                    // when there are children, they must have passed the predicate check and thus the folder
+                    // should remain -- do nothing in that case, but set the success flag to true anyway
+                    $deleteWasSuccessful = $directoryHasChildren || rmdir($fileInfo->getRealPath());
+                }
+
+                if ($deleteWasSuccessful !== true) {
                     throw new CommandFailureException("Unable to delete file or directory: {$fileInfo->getRealPath()}");
                 }
             }

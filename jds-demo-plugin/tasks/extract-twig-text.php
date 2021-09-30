@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 
 require_once(dirname(__DIR__) . '/vendor/autoload.php');
 
-$di = (new DependencyContainerFactory())->create();
+$di = (new DependencyContainerFactory())->create(dirname(__DIR__), DependencyContainerFactory::ENV_TASK);
 
 /** @var TwigTextExtractor $twigTextExtractor */
 $twigTextExtractor = $di->get(TwigTextExtractor::class);

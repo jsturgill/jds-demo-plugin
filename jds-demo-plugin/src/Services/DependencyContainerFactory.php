@@ -28,6 +28,7 @@ class DependencyContainerFactory
 {
     public const ENV_PROD = 'production';
     public const ENV_TEST = 'test';
+    public const ENV_TASK = 'task';
 
     public const LOG_PATH_PARTIAL = 'logs';
 

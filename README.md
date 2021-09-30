@@ -5,32 +5,37 @@ Below are instructions on how to get the dev environment up and running.
 The commands were tested under Windows git bash. It should be straightforward for you
 to adjust as necessary for your environment.
 
-Note: Docker compose is required.
+Note: Docker compose is required, as is PHP 7.4 or greater.
 
 ## Local Dev Environment
 
 To get started:
 
-1. copy `.env.template` to `.env` and update any values, then
-2. run `init.sh` to download WordPress, run docker install, and stage some files. Finally,
-3. execute `docker compose up`.
+1. copy `docker/.env.template` to `docker/.env` and (optionally) update any values you like, then
+2. run `init.sh` to do some housekeeping. Finally,
+3. execute `docker compose -f docker/docker-compose.yml up`.
 
 ## Dev-Utils Setup
 
-The example commands in this documentation expect certain `phar` files to exist in `dev-utils`.
-
-Run the following command to download them:
-
-```bash
-./dev-utils/fetch-phars.sh
-```
+The example commands in this documentation expect `dev-utils` to be initialized by downloading
+certain `.phar` files and installing composer dependencies. All of this is taken care of by 
+running `init.sh` in the root directory.
 
 ## Tests
 
-To run tests:
+To run tests within docker:
 
 ```bash
-./jds-demo-plugin/vendor/bin/codecept -c jds-demo-plugin run
+# dev tests
+docker-compose -f docker/docker-compose.yml -f docker/docker-compose.tests.yml up --exit-code-from codeception --abort-on-container-exit
+# prod build test
+./build.sh && docker-compose -f docker/docker-compose.yml -f docker/docker-compose.tests.yml -f docker/docker-compose.tests.prod.yml up --exit-code-from codeception --abort-on-container-exit
+```
+
+To create a new test:
+
+```bash
+./jds-demo-plugin/vendor/bin/codecept -c jds-demo-plugin generate:test unit FileSystem
 ```
 
 ## Updating the .pot file
@@ -81,6 +86,23 @@ To build:
 To test drive the build on localhost:
 
 ```bash
-# within the project root (NOT ./jds-demo-plugin)
-./test-drive-release.sh
+docker-compose -f docker/docker-compose.yml -f docker/docker-compose.serve-prod-build.yml up --abort-on-container-exit --exit-code-from php
+```
+
+Then visit `http://nginx/wordpress`.
+
+Note: this requires an entry in your hosts file pointing host `nginx` to localhost.  In windows, the hosts file is 
+located at `C:\Windows\System32\drivers\etc\hosts`. In linux, the hosts file is likely at `/etc/hosts`.
+
+## Clean Start
+
+To blow away docker resources related to this project:
+
+```bash
+# specify the relevant .yml file and call the "down" command
+docker compose -f docker/docker-compose.yml down
+
+# to completely reset:
+
+docker compose -f docker/docker-compose.yml down --rmi all --volumes
 ```

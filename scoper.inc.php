@@ -5,7 +5,6 @@ declare(strict_types=1);
 require_once 'scoper-fixes/twigPatcher.php';
 
 use Isolated\Symfony\Component\Finder\Finder;
-use function JdsDemoPlugin\Patchers\twigPatcher;
 
 $polyfillsBootstraps = array_keys(iterator_to_array(Finder::create()
     ->files()
@@ -22,7 +21,7 @@ return [
     // The prefix configuration. If a non null value will be used, a random prefix will be generated.
     'prefix' => 'JdsDesigns\Release',
 
-    // By default when running php-scoper add-prefix, it will prefix all relevant code found in the current working
+    // By default, when running php-scoper add-prefix, it will prefix all relevant code found in the current working
     // directory. You can however define which files should be scoped by defining a collection of Finders in the
     // following configuration key.
     //
@@ -34,7 +33,7 @@ return [
             './jds-demo-plugin/templates',
             './jds-demo-plugin/logs',
             './jds-demo-plugin/db'
-            ])->notName(['*.log']),
+        ])->notName(['*.log']),
         Finder::create()->files()->in('./jds-demo-plugin')->name(['jds-demo-plugin.php', 'phinx.wordpress.php']),
         Finder::create()
             ->files()

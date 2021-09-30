@@ -2,6 +2,7 @@
 
 namespace JdsDemoPlugin\Services\TwigTextExtractor;
 
+use _PHPStan_68495e8a9\Nette\Neon\Exception;
 use JdsDemoPlugin\Config\TemplateConfig;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\FileSystem;
@@ -33,7 +34,7 @@ class TwigTextExtractorConfig
             throw new InvalidArgumentException("Expected a .twig extension: $relativeTemplatePath");
         }
 
-        return $this->outputDir . "/${pathinfo['dirname']}/${pathinfo['filename']}.php";
+        return $this->outputDir . $pathinfo['dirname'] . DIRECTORY_SEPARATOR . "${pathinfo['filename']}.php";
     }
 
     public function domain(): string

@@ -270,8 +270,7 @@ class TwigTextExtractor
             return;
         }
 
-        // add one to input path to account for trailing slash
-        $relativePath = mb_substr($fileInfo->getRealPath(), $this->config->inputPathLength + 1);
+        $relativePath = mb_substr($fileInfo->getRealPath(), $this->config->inputPathLength);
 
         $stream = $this->twig->tokenize(
             new Source(
@@ -290,7 +289,12 @@ class TwigTextExtractor
 
         // filter out skip entries and join together as lines of code to write out
         $lines = join("\n", array_values($text));
-        file_put_contents($this->config->toOutputFilePath($relativePath), "<?php\n$lines\n");
+        $outputPath = $this->config->toOutputFilePath($relativePath);
+        $outputDir = dirname($outputPath);
+        if (!is_dir($outputDir)) {
+            mkdir($outputDir, 0755, true);
+        }
+        file_put_contents($outputPath, "<?php\n$lines\n");
     }
 
     /**

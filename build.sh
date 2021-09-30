@@ -7,3 +7,4 @@ rm -r build
 mkdir build/logs
 ./dev-utils/composer.phar --working-dir=build dump-autoload --classmap-authoritative
 ./dev-utils/composer.phar --working-dir=jds-demo-plugin install
+mkdir -p build/cache

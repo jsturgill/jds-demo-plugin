@@ -1,5 +1,4 @@
 DEVNOTES.md
-.env
 /wordpress*
 .idea/
 *.cache

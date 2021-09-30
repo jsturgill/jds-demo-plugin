@@ -27,7 +27,7 @@ class Plugin
     private Menu $optionsMenu;
     private PluginBaseName $pluginBaseName;
     private LoggerInterface $logger;
-    private IMigrationManager $migrationManager;
+    private ?IMigrationManager $migrationManager = null;
 
     public function __construct(
         PluginBaseName                $pluginBaseName,
