@@ -2,9 +2,11 @@
 
 namespace JdsDemoPlugin;
 
+use Exception;
 use JdsDemoPlugin\Exceptions\CommandFailureException;
 use JdsDemoPlugin\Services\Persistence\IMigrationManager;
 use JdsDemoPlugin\Services\Persistence\IMigrationManagerFactory;
+use JdsDemoPlugin\Services\Persistence\INameRepository;
 use JdsDemoPlugin\WordPressApi\IMenuFactory;
 use JdsDemoPlugin\WordPressApi\IPluginLifecycleActionFactory;
 use JdsDemoPlugin\WordPressApi\Menu;
@@ -28,18 +30,20 @@ class Plugin
     private PluginBaseName $pluginBaseName;
     private LoggerInterface $logger;
     private ?IMigrationManager $migrationManager = null;
+    private INameRepository $nameRepository;
 
     public function __construct(
         PluginBaseName                $pluginBaseName,
         IMenuFactory                  $menuFactory,
         IPluginLifecycleActionFactory $pluginLifecycleActionFactory,
         IMigrationManagerFactory      $migrationManagerFactory,
-        LoggerInterface               $logger
+        LoggerInterface               $logger,
+        INameRepository               $nameRepository
     ) {
         $this->logger = $logger;
         $this->pluginBaseName = $pluginBaseName;
         $this->migrationManagerFactory = $migrationManagerFactory;
-
+        $this->nameRepository = $nameRepository;
         // migrate on activation
         array_push(
             $this->lifecycleActions,
@@ -85,7 +89,24 @@ class Plugin
             "manage_options",
             "jds-demo-plugin-options",
             Plugin::TEMPLATE_OPTIONS_MENU,
-            fn () => ['audience' => self::NAME_BANK[array_rand(self::NAME_BANK)]]
+            function () {
+                try {
+                    return [
+                        'audience' => $this->nameRepository->getRandomName(),
+                        'error' => false
+                    ];
+                } catch (Exception $e) {
+                    $this->logger->error(
+                        "Error grabbing a random name from the repository",
+                        ['message'=> $e->getMessage(), 'trace' => $e->getTrace()]
+                    );
+
+                    return [
+                        'audience' => 'World',
+                        'error' => true
+                    ];
+                }
+            }
         );
     }
 

@@ -1,3 +1,7 @@
 <h1>{{ __('Demo "Plugin" Page') }}</h1>
 <p>{{ __('Hello, %s!', 'casual greeting')|format(audience) }}</p>
-<p>{{ __('Hit refresh to view another name (selected at random).') }}</p>
+{% if error is same as(false) %}
+	<p>{{ __('Hit refresh to view another name (selected at random).') }}</p>
+{% else %}
+	<p style="font-size: small; color: red;">{{ __('Problem connecting to database.') }}</p>
+{% endif %}

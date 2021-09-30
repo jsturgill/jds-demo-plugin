@@ -6,9 +6,11 @@ use DI;
 use Exception;
 use JdsDemoPlugin\Plugin;
 use JdsDemoPlugin\Services\Persistence\IMigrationManagerFactory;
+use JdsDemoPlugin\Services\Persistence\INameRepository;
 use JdsDemoPlugin\Services\Persistence\MigrationManagerFactory;
 use JdsDemoPlugin\Config\ConfigFactory;
 use JdsDemoPlugin\Config\TemplateConfig;
+use JdsDemoPlugin\Services\Persistence\WpDbNameRepository;
 use JdsDemoPlugin\Services\TwigTextExtractor\TwigTextExtractorConfig;
 use JdsDemoPlugin\WordPressApi\IMenuFactory;
 use JdsDemoPlugin\WordPressApi\IPluginLifecycleActionFactory;
@@ -203,6 +205,12 @@ class DependencyContainerFactory
             TwigTextExtractor::class => DI\autowire(TwigTextExtractor::class),
             IMenuFactory::class => DI\autowire(MenuFactory::class),
             PluginBaseName::class => DI\create(PluginBaseName::class)->constructor(DI\get('paths.pluginFile')),
+            'wpdb' => function (ContainerInterface $c): \wpdb {
+                global $wpdb;
+                /** @var \wpdb $wpdb */
+                return $wpdb;
+            },
+            INameRepository::class => DI\autowire(WpDbNameRepository::class),
             Plugin::class => DI\autowire(Plugin::class),
             FileSystem::class => DI\create(FileSystem::class)->constructor($rootPluginPath, true),
             IMigrationManagerFactory::class => DI\autowire(MigrationManagerFactory::class)

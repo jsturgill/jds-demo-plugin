@@ -25,11 +25,9 @@ ENV PAGER=more
 
 ADD ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
-RUN addgroup -g 1000 wordpress && adduser -G wordpress -g wordpress -s /bin/sh -D wordpress
-
 RUN mkdir -p /var/www/html/wordpress
 
-RUN chown -R wordpress:wordpress /var/www/html
+RUN chown -R www-data:www-data /var/www/html
 
 WORKDIR /var/www/html
 
