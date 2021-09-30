@@ -1,4 +1,0 @@
-version: '3.9'
-services:
-  php:
-    command: sh -c "/var/scripts/init-wp.sh && /var/scripts/run-tests.sh"

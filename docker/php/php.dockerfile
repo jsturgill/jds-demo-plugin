@@ -33,20 +33,27 @@ RUN chown -R wordpress:wordpress /var/www/html
 
 WORKDIR /var/www/html
 
-RUN docker-php-ext-install mysqli pdo pdo_mysql && docker-php-ext-enable pdo_mysql
+RUN docker-php-ext-install mysqli pdo pdo_mysql \
+	&& docker-php-ext-enable pdo_mysql
 
 # mariadb-connector-c adds caching_sha2_password see https://github.com/craftcms/docker/issues/19
 RUN apk add mysql-client mariadb-connector-c
+
+COPY ./scripts /opt/scripts
+
+COPY ./files/wordpress /var/www/html/wordpress
+
+COPY ./scripts/call-bash-script.php /var/www/html
 
 RUN curl https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /usr/local/bin/wp \
     && chmod +x /usr/local/bin/wp \
     && curl https://getcomposer.org/download/latest-stable/composer.phar -o /usr/local/bin/composer \
     && chmod +x /usr/local/bin/composer \
     && curl https://codeception.com/codecept.phar -o /usr/local/bin/codecept \
-    && chmod +x /usr/local/bin/codecept
+    && chmod +x /usr/local/bin/codecept \
+    && chmod a+rx /opt/scripts/*.sh
 
-COPY ./scripts /var/scripts
 
-COPY ./files/wordpress /var/www/html
+ENTRYPOINT ["/opt/scripts/php-entrypoint.sh"]
 
-CMD sh -c "/var/scripts/init-wp.sh" && sh -c "/var/scripts/start-php.sh"
+#CMD sh -c "/var/scripts/init-wp.sh" && sh -c "/var/scripts/start-php.sh"

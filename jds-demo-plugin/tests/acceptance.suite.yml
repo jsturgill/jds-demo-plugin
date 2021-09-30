@@ -7,7 +7,10 @@
 actor: AcceptanceTester
 modules:
     enabled:
-        - PhpBrowser:
-            url: http://localhost/myapp
+        - WebDriver:
+            url: http://nginx/wordpress
+            browser: chrome
+            host: chrome
         - \Helper\Acceptance
-step_decorators: ~        
+step_decorators:
+  - \Codeception\Step\Retry

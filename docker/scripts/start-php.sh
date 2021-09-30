@@ -2,4 +2,4 @@
 
 echo "starting PHP FPM"
 php-fpm
-sleep infinite
+sleep infinity

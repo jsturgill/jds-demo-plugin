@@ -1,0 +1,22 @@
+version: '3.9'
+services:
+  codeception:
+    build:
+      context: .
+      dockerfile: ./codeception/codeception.dockerfile
+#    entrypoint: ''
+#    command: sleep infinity
+    environment:
+      PROTOCOL: http
+    volumes:
+      - ../jds-demo-plugin:/project
+      - ./scripts:/opt/scripts
+    depends_on:
+      - chrome
+      - php
+      - nginx
+  chrome:
+    image: "selenium/standalone-chrome-debug:latest"
+
+
+

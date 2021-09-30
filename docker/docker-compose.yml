@@ -7,7 +7,7 @@ services:
     ports:
       - ${LOCAL_HTTP_PORT}:80
     volumes:
-      - ../jds-demo-plugin:/var/www/html/wp-content/plugins/jds-demo-plugin
+      - ../jds-demo-plugin:/var/www/html/wordpress/wp-content/plugins/jds-demo-plugin
     depends_on:
       - php
       - mysql
@@ -32,10 +32,10 @@ services:
         dbuser: ${MYSQL_USER}
         dbpass: ${MYSQL_PASSWORD}
         dbhost: mysql
-        url: ${LOCAL_URL}
+        url: nginx/wordpress
         title: ${SITE_TITLE}
         admin_user: ${ADMIN_USER}
         admin_password: ${ADMIN_PASSWORD}
         admin_email: ${ADMIN_EMAIL}
     volumes:
-      - ../jds-demo-plugin:/var/www/html/wp-content/plugins/jds-demo-plugin
+      - ../jds-demo-plugin:/var/www/html/wordpress/wp-content/plugins/jds-demo-plugin

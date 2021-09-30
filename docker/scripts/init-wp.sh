@@ -1,6 +1,8 @@
 #!/bin/sh
 
-/var/scripts/wait-for.sh "$DBHOST:3306"
+/opt/scripts/wait-for.sh "$DBHOST:3306"
+
+php /var/www/html/wordpress/wp-content/plugins/jds-demo-plugin/tasks/clean-cache.php
 
 if [ $? -eq 0 ]; then
     echo "mysql is available"
@@ -10,14 +12,14 @@ else
 fi
 
 echo "creating config"
-wp config create --dbname="$DBNAME" --dbuser="$DBUSER" --dbpass="$DBPASS" --dbhost="$DBHOST" --path=/var/www/html --allow-root
+wp config create --dbname="$DBNAME" --dbuser="$DBUSER" --dbpass="$DBPASS" --dbhost="$DBHOST" --path=/var/www/html/wordpress --allow-root
 
 # not needed -- database is created according to .env file already
 # echo "creating database"
 # wp db create --path=/var/www/html --allow-root
 
 echo "installing"
-wp core install --url="$URL" --title="$TITLE" --admin_user="$ADMIN_USER" --admin_password="$ADMIN_PASSWORD" --admin_email="$ADMIN_EMAIL" --path=/var/www/html --allow-root
+wp core install --url="$URL" --title="$TITLE" --admin_user="$ADMIN_USER" --admin_password="$ADMIN_PASSWORD" --admin_email="$ADMIN_EMAIL" --path=/var/www/html/wordpress --allow-root
 
 echo "activating plugin"
-wp plugin activate jds-demo-plugin --path=/var/www/html --allow-root
+wp plugin activate jds-demo-plugin --path=/var/www/html/wordpress --allow-root

@@ -23,17 +23,13 @@ running `init.sh` in the root directory.
 
 ## Tests
 
-To run tests locally:
+To run tests within docker:
 
 ```bash
-./jds-demo-plugin/vendor/bin/codecept -c jds-demo-plugin run
-```
-
-or within docker (preferred):
-
-```bash
-# note: call with the "down" command to reset images (e.g. fresh MySQL state)
-docker-compose -f docker/docker-compose.yml -f docker/docker-compose.dev-tests.yml up --abort-on-container-exit --exit-code-from php
+# dev tests
+docker-compose -f docker/docker-compose.yml -f docker/docker-compose.tests.yml up --exit-code-from codeception --abort-on-container-exit
+# prod build test
+./build.sh && docker-compose -f docker/docker-compose.yml -f docker/docker-compose.tests.yml -f docker/docker-compose.tests.prod.yml up --exit-code-from codeception --abort-on-container-exit
 ```
 
 To create a new test:
