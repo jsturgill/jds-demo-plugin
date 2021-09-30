@@ -89,6 +89,11 @@ To test drive the build on localhost:
 docker-compose -f docker/docker-compose.yml -f docker/docker-compose.serve-prod-build.yml up --abort-on-container-exit --exit-code-from php
 ```
 
+Then visit `http://nginx/wordpress`.
+
+Note: this requires an entry in your hosts file pointing host `nginx` to localhost.  In windows, the hosts file is 
+located at `C:\Windows\System32\drivers\etc\hosts`. In linux, the hosts file is likely at `/etc/hosts`.
+
 ## Clean Start
 
 To blow away docker resources related to this project:
