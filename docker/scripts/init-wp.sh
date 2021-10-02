@@ -3,9 +3,7 @@
 /opt/scripts/wait-for.sh "$DBHOST:3306"
 
 php /var/www/html/wordpress/wp-content/plugins/jds-demo-plugin/tasks/clean-cache.php
-
-# ensure the mounted plugin files are owned by the correct user
-chown -R www-data:www-data /var/www/html/wordpress/wp-content/plugins/jds-demo-plugin/
+php /var/www/html/wordpress/wp-content/plugins/jds-demo-plugin/tasks/clean-logs.php
 
 if [ $? -eq 0 ]; then
     echo "mysql is available"

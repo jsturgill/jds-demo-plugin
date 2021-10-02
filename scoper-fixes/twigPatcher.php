@@ -1,6 +1,6 @@
 <?php
 
-namespace JdsDemoPlugin\Patchers;
+namespace JdsDemoPlugin\Patchers\Twig;
 
 use Exception;
 
@@ -30,6 +30,13 @@ function init(): array
     return json_decode($rawFunctionsFileContents, true);
 }
 
+/**
+ * Factory for twig patcher function
+ *
+ * Returned callable replaces various twig function calls in strings (etc.) missed by
+ * php-scoper.
+ * @return callable
+ */
 function twigPatcher(): callable
 {
     $twigRootFunctionsLookup = init();
@@ -59,18 +66,20 @@ function twigPatcher(): callable
             );
 
             // now replace bare function calls with namespaced function calls
+            // WARNING: not multibyte safe
             $contents = str_replace($twigRootFunctionsList, $twigRootReplacements, $contents);
 
             // next step: replace quoted function strings, used in code generation or other such madness
             $singleQuoteFunctionStrings = array_map(fn ($func) => "'$func'", array_keys($twigRootFunctionsLookup));
             $singeQuoteReplacements = array_map(fn ($func) => "'$prefix\\$func'", array_keys($twigRootFunctionsLookup));
+            // WARNING: not multibyte safe
             $contents = str_replace($singleQuoteFunctionStrings, $singeQuoteReplacements, $contents);
 
             // replace use statement strings -- which currently only appear in one file
             $moduleNode = 'ModuleNode.php';
             if ($moduleNode === $fileName) {
-                $contents = preg_replace_callback(
-                    "/\"use (Twig\\\+[^\"]+)\"/",
+                $contents = mb_ereg_replace_callback(
+                    "\"use (Twig\\\+[^\"]+)\"",
                     fn (array $matches) => "\"use $prefix\\\\$matches[1]\"",
                     $contents
                 );

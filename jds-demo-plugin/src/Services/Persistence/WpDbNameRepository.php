@@ -4,20 +4,20 @@ namespace JdsDemoPlugin\Services\Persistence;
 
 use JdsDemoPlugin\Services\Persistence\Exceptions\QueryFailureException;
 use Psr\Log\LoggerInterface;
+use wpdb;
 
 class WpDbNameRepository implements INameRepository
 {
     /**
-     * @var \wpdb
+     * @var wpdb
      * @see https://developer.wordpress.org/reference/classes/wpdb/
-     * @noinspection PhpFullyQualifiedNameUsageInspection
      */
-    private \wpdb $wpdb;
+    private wpdb $wpdb;
     private MySqlQueries $mySqlQueries;
     private LoggerInterface $logger;
 
     public function __construct(
-        \wpdb $wpdb,
+        wpdb $wpdb,
         MySqlQueries $mySqlQueries,
         LoggerInterface               $logger
     ) {

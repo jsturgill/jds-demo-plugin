@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once 'scoper-fixes/twigPatcher.php';
+require_once 'scoper-fixes/import.php';
 
 use Isolated\Symfony\Component\Finder\Finder;
 
@@ -70,7 +70,8 @@ return [
     //
     // For more see: https://github.com/humbug/php-scoper#patchers
     'patchers' => [
-        JdsDemoPlugin\Patchers\twigPatcher()
+        JdsDemoPlugin\Patchers\Twig\twigPatcher(),
+        JdsDemoPlugin\Patchers\RootNamespace\rootNamespacePatcher(),
     ],
 
     // PHP-Scoper's goal is to make sure that all code for a project lies in a distinct PHP namespace. However, you
@@ -84,23 +85,8 @@ return [
     // Fore more see https://github.com/humbug/php-scoper#whitelist
     'whitelist' => [
         'Symfony\\Polyfill\\*',
-        // 'PHPUnit\Framework\TestCase',   // A specific class
-        // 'PHPUnit\Framework\*',          // The whole namespace
-        // '*',                            // Everything
     ],
-
-    // If `true` then the user defined constants belonging to the global namespace will not be prefixed.
-    //
-    // For more see https://github.com/humbug/php-scoper#constants--constants--functions-from-the-global-namespace
     'whitelist-global-constants' => true,
-
-    // If `true` then the user defined classes belonging to the global namespace will not be prefixed.
-    //
-    // For more see https://github.com/humbug/php-scoper#constants--constants--functions-from-the-global-namespace
     'whitelist-global-classes' => true,
-
-    // If `true` then the user defined functions belonging to the global namespace will not be prefixed.
-    //
-    // For more see https://github.com/humbug/php-scoper#constants--constants--functions-from-the-global-namespace
     'whitelist-global-functions' => true,
 ];
