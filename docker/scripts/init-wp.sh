@@ -4,6 +4,9 @@
 
 php /var/www/html/wordpress/wp-content/plugins/jds-demo-plugin/tasks/clean-cache.php
 
+# ensure the mounted plugin files are owned by the correct user
+chown -R www-data:www-data /var/www/html/wordpress/wp-content/plugins/jds-demo-plugin/
+
 if [ $? -eq 0 ]; then
     echo "mysql is available"
 else

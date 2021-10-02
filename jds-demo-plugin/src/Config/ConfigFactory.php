@@ -3,6 +3,7 @@
 namespace JdsDemoPlugin\Config;
 
 use JdsDemoPlugin\Services\FileSystem;
+use JdsDemoPlugin\Services\Persistence\PersistenceConfig;
 use JdsDemoPlugin\Services\TwigTextExtractor\TwigTextExtractorConfig;
 
 // TODO interface for ConfigFactory
@@ -29,6 +30,14 @@ class ConfigFactory
     {
         $this->pluginRootPath = rtrim($rootPluginPath, FileSystem::PATH_SEPARATORS) . DIRECTORY_SEPARATOR;
         $this->translationDomain = $translationDomain;
+    }
+
+    /**
+     * @return PersistenceConfig
+     */
+    public function createPersistenceConfig(): PersistenceConfig
+    {
+        return new PersistenceConfig();
     }
 
     /**

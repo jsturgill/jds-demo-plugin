@@ -6,6 +6,9 @@ services:
       dockerfile: ./codeception/codeception.dockerfile
 #    entrypoint: ''
 #    command: sleep infinity
+      args:
+        admin_user: ${ADMIN_USER}
+        admin_password: ${ADMIN_PASSWORD}
     environment:
       PROTOCOL: http
     volumes:
