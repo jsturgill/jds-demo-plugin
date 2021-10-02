@@ -21,11 +21,18 @@ class AcceptanceTester extends Actor
 {
     use _generated\AcceptanceTesterActions;
 
-    public function login($name, $password)
+    public const ENV_WP_ADMIN_USER = 'ADMIN_USER';
+    public const ENV_WP_ADMIN_PASSWORD = 'ADMIN_PASSWORD';
+    public const SESSION_SNAPSHOT_LOGIN = 'login';
+
+    public function login($name = null, $password = null)
     {
+        $name ??= getenv(self::ENV_WP_ADMIN_USER);
+        $password ??= getenv(self::ENV_WP_ADMIN_PASSWORD);
+
         $I = $this;
         // if snapshot exists - skipping login
-        if ($I->loadSessionSnapshot('login')) {
+        if ($I->loadSessionSnapshot(self::SESSION_SNAPSHOT_LOGIN)) {
             return;
         }
 
@@ -48,6 +55,6 @@ class AcceptanceTester extends Actor
         $I->see("Dashboard");
 
         // saving snapshot
-        $I->saveSessionSnapshot('login');
+        $I->saveSessionSnapshot(self::SESSION_SNAPSHOT_LOGIN);
     }
 }

@@ -6,9 +6,8 @@ class AuthenticationCest
     {
     }
 
-//    // tests
     public function tryToLoginTest(AcceptanceTester $I)
     {
-        $I->login('jsturgill', 'fuq*Y@lyiB(3l(^cW3');
+        $I->login();
     }
 }

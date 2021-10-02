@@ -1,5 +1,11 @@
 FROM codeception/codeception:4.1.21
 
+ARG admin_password
+ARG admin_user
+
+ENV ADMIN_USER=$admin_user
+ENV ADMIN_PASSWORD=$admin_password
+
 COPY ./scripts /opt/scripts
 
 RUN apt-get update \
