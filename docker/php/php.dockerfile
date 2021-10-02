@@ -27,8 +27,6 @@ ADD ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 RUN mkdir -p /var/www/html/wordpress
 
-RUN chown -R www-data:www-data /var/www/html
-
 WORKDIR /var/www/html
 
 RUN docker-php-ext-install mysqli pdo pdo_mysql \
@@ -50,7 +48,6 @@ RUN curl https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
     && curl https://codeception.com/codecept.phar -o /usr/local/bin/codecept \
     && chmod +x /usr/local/bin/codecept \
     && chmod a+rx /opt/scripts/*.sh
-
 
 ENTRYPOINT ["/opt/scripts/php-entrypoint.sh"]
 

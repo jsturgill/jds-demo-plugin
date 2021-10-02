@@ -2,6 +2,7 @@
 
 namespace JdsDemoPlugin\Services;
 
+use wpdb;
 use DI;
 use Exception;
 use JdsDemoPlugin\Plugin;
@@ -124,7 +125,6 @@ class DependencyContainerFactory
                     string  $text,
                     ?string $comment = null
                 ): void {
-                    /** @noinspection PhpUndefinedFunctionInspection */
                     _e($text, 'jds-demo-plugin-domain');
                 }));
 
@@ -133,7 +133,6 @@ class DependencyContainerFactory
                     string  $context,
                     ?string $comment = null
                 ) {
-                    /** @noinspection PhpUndefinedFunctionInspection */
                     _x($text, $context, 'jds-demo-plugin-domain');
                 }));
 
@@ -142,7 +141,6 @@ class DependencyContainerFactory
                     string  $context,
                     ?string $comment = null
                 ): void {
-                    /** @noinspection PhpUndefinedFunctionInspection */
                     _ex($text, $context, 'jds-demo-plugin-domain');
                 }));
 
@@ -152,7 +150,6 @@ class DependencyContainerFactory
                     int     $number,
                     ?string $comment = null
                 ) {
-                    /** @noinspection PhpUndefinedFunctionInspection */
                     _n($single, $plural, $number, 'jds-demo-plugin-domain');
                 }));
 
@@ -161,7 +158,7 @@ class DependencyContainerFactory
                     string  $plural,
                     ?string $comment = null
                 ) {
-                    /** @noinspection PhpUndefinedFunctionInspection */
+                    /** @noinspection PhpExpressionResultUnusedInspection */
                     _n_noop($single, $plural, 'jds-demo-plugin-domain');
                 }));
 
@@ -172,7 +169,6 @@ class DependencyContainerFactory
                     string  $context,
                     ?string $comment = null
                 ) {
-                    /** @noinspection PhpUndefinedFunctionInspection */
                     _nx($single, $plural, $number, $context, 'jds-demo-plugin-domain');
                 }));
 
@@ -182,13 +178,13 @@ class DependencyContainerFactory
                     string  $context,
                     ?string $comment = null
                 ) {
-                    /** @noinspection PhpUndefinedFunctionInspection */
+
+                    /** @noinspection PhpExpressionResultUnusedInspection */
                     _nx_noop($single, $plural, $context, 'jds-demo-plugin-domain');
                 }));
 
                 // the following translation functions are not used by the TwigTextExtractor
                 $twig->addFunction(new TwigFunction('translate', function (string $text): string {
-                    /** @noinspection PhpUndefinedFunctionInspection */
                     return translate($text, 'jds-demo-plugin-domain');
                 }));
 
@@ -196,7 +192,6 @@ class DependencyContainerFactory
                     array $noopedPlural,
                     int   $count
                 ) {
-                    /** @noinspection PhpUndefinedFunctionInspection */
                     translate_nooped_plural($noopedPlural, $count, 'jds-demo-plugin-domain');
                 }));
 
@@ -205,9 +200,9 @@ class DependencyContainerFactory
             TwigTextExtractor::class => DI\autowire(TwigTextExtractor::class),
             IMenuFactory::class => DI\autowire(MenuFactory::class),
             PluginBaseName::class => DI\create(PluginBaseName::class)->constructor(DI\get('paths.pluginFile')),
-            'wpdb' => function (ContainerInterface $c): \wpdb {
+            'wpdb' => function (ContainerInterface $c): wpdb {
                 global $wpdb;
-                /** @var \wpdb $wpdb */
+                /** @var wpdb $wpdb */
                 return $wpdb;
             },
             INameRepository::class => DI\autowire(WpDbNameRepository::class),
