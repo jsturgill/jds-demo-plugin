@@ -3,5 +3,5 @@
 {% if error is same as(false) %}
 	<p>{{ __('Hit refresh to view another name (selected at random).') }}</p>
 {% else %}
-	<p style="font-size: small; color: red;">{{ __('Problem connecting to database.') }}</p>
+	<p style="font-size: small; color: red;">{{ __(errorMessage) }}</p>
 {% endif %}

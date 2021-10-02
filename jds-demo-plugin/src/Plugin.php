@@ -20,6 +20,8 @@ class Plugin
     public const TRANSLATION_DOMAIN = 'jds-demo-plugin-domain';
     public const TEMPLATE_OPTIONS_MENU = 'jds-demo-plugin-options.twig';
     public const PLUGIN_FILE_NAME = 'jds-demo-plugin.php';
+    public const ERROR_MESSAGE_NAME_REPO_FAILURE = 'Problem connecting to database.';
+    public const DEFAULT_AUDIENCE = 'World';
 
     /**
      * @var array<PluginLifecycleAction>
@@ -92,7 +94,7 @@ class Plugin
             function () {
                 try {
                     return [
-                        'audience' => $this->nameRepository->getRandomName(),
+                        'audience' => $this->nameRepository->getRandomName([self::DEFAULT_AUDIENCE]),
                         'error' => false
                     ];
                 } catch (Exception $e) {
@@ -103,7 +105,8 @@ class Plugin
 
                     return [
                         'audience' => 'World',
-                        'error' => true
+                        'error' => true,
+                        'errorMessage' => self::ERROR_MESSAGE_NAME_REPO_FAILURE
                     ];
                 }
             }
