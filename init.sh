@@ -6,6 +6,15 @@ SCRIPT_DIR=$(pwd)
 
 printf "executing within %s \n\n" "$SCRIPT_DIR"
 
+# set up certs if they aren't already installed
+
+if [ ! -f "./docker/nginx/files/dev.cert" ]; then
+	echo "creating dev SSL cert"
+	./create-dev-cert.sh
+else
+	echo "SSL cert already created"
+fi
+
 # dev-utils folder phars
 
 if [ ! -f "./dev-utils/composer.phar" ]; then

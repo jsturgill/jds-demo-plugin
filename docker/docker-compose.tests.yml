@@ -5,16 +5,22 @@ services:
       context: .
       dockerfile: ./codeception/codeception.dockerfile
       args:
-        admin_user: ${ADMIN_USER}
-        admin_password: ${ADMIN_PASSWORD}
+        wp_admin_user: ${WP_ADMIN_USER}
+        wp_admin_password: ${WP_ADMIN_PASSWORD}
+        wp_host: ${ALIAS_NGINX}
+        wp_path: /wordpress/
         dbname: ${MYSQL_TEST_DATABASE}
         dbuser: ${MYSQL_TEST_USER}
-        dbpass: ${MYSQL_PASSWORD}
-        dbhost: mysql
+        dbpass: ${MYSQL_TEST_USER_PASSWORD}
+        dbhost: ${ALIAS_MYSQL}
 #    entrypoint: ''
 #    command: sleep infinity
     environment:
       PROTOCOL: http
+    networks:
+      default:
+        aliases:
+          - ${ALIAS_CODECEPTION}
     volumes:
       - ../jds-demo-plugin:/project
       - ./scripts:/opt/scripts
@@ -25,6 +31,9 @@ services:
       - mysql
   chrome:
     image: "selenium/standalone-chrome-debug:latest"
-
+    networks:
+      default:
+        aliases:
+          - ${ALIAS_SELENIUM_CHROME}
 
 

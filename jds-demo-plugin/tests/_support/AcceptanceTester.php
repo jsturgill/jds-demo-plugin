@@ -21,8 +21,8 @@ class AcceptanceTester extends Actor
 {
     use _generated\AcceptanceTesterActions;
 
-    public const ENV_WP_ADMIN_USER = 'ADMIN_USER';
-    public const ENV_WP_ADMIN_PASSWORD = 'ADMIN_PASSWORD';
+    public const ENV_WP_ADMIN_USER = 'WP_ADMIN_USER';
+    public const ENV_WP_ADMIN_PASSWORD = 'WP_ADMIN_PASSWORD';
     public const SESSION_SNAPSHOT_LOGIN = 'login';
 
     public function login($name = null, $password = null)

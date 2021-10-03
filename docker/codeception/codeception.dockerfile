@@ -1,8 +1,10 @@
 FROM codeception/codeception:4.1.21
 
 # wordpress stuff
-ARG admin_password
-ARG admin_user
+ARG wp_admin_password
+ARG wp_admin_user
+ARG wp_host
+ARG wp_path
 
 # db stuff
 ARG dbname
@@ -11,8 +13,10 @@ ARG dbpass
 ARG dbhost
 
 # wordpress stuff
-ENV ADMIN_USER=$admin_user
-ENV ADMIN_PASSWORD=$admin_password
+ENV WP_ADMIN_USER=$wp_admin_user
+ENV WP_ADMIN_PASSWORD=$wp_admin_password
+ENV WP_HOST=$wp_host
+ENV WP_PATH=$wp_path
 
 # database stuff
 ENV DBNAME=$dbname

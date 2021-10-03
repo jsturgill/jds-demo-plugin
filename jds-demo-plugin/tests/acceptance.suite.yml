@@ -8,7 +8,7 @@ actor: AcceptanceTester
 modules:
     enabled:
         - WebDriver:
-            url: http://nginx/wordpress
+            url: "http://%WP_HOST%%WP_PATH%"
             browser: chrome
             host: chrome
         - \Helper\Acceptance

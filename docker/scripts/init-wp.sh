@@ -12,14 +12,14 @@ else
     exit 1
 fi
 
-echo "creating config"
+echo "creating WP config for mysql host $DBHOST"
 wp config create --dbname="$DBNAME" --dbuser="$DBUSER" --dbpass="$DBPASS" --dbhost="$DBHOST" --path=/var/www/html/wordpress --allow-root
 
 # not needed -- database is created according to .env file already
 # echo "creating database"
 # wp db create --path=/var/www/html --allow-root
 
-echo "installing"
+echo "installing WP with URL $URL"
 wp core install --url="$URL" --title="$TITLE" --admin_user="$ADMIN_USER" --admin_password="$ADMIN_PASSWORD" --admin_email="$ADMIN_EMAIL" --path=/var/www/html/wordpress --allow-root
 
 echo "activating plugin"

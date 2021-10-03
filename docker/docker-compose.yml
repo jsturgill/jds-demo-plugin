@@ -6,11 +6,16 @@ services:
       dockerfile: ./nginx/nginx.dockerfile
     ports:
       - ${LOCAL_HTTP_PORT}:80
+      - ${LOCAL_HTTPS_PORT}:443
     volumes:
       - ../jds-demo-plugin:/var/www/html/wordpress/wp-content/plugins/jds-demo-plugin
     depends_on:
       - php
       - mysql
+    networks:
+      default:
+        aliases:
+          - ${ALIAS_NGINX}
   mysql:
     build:
       context: .
@@ -19,13 +24,17 @@ services:
     ports:
       - ${LOCAL_MYSQL_PORT}:3306
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_WORDPRESS_DATABASE}
+      MYSQL_USER: ${MYSQL_WORDPRESS_USER}
+      MYSQL_PASSWORD: ${MYSQL_WORDPRESS_USER_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_TEST_DATABASE: ${MYSQL_TEST_DATABASE}
       MYSQL_TEST_USER: ${MYSQL_TEST_USER}
       MYSQL_TEST_USER_PASSWORD: ${MYSQL_TEST_USER_PASSWORD}
+    networks:
+      default:
+        aliases:
+          - ${ALIAS_MYSQL}
   php:
     depends_on:
       - mysql
@@ -33,14 +42,18 @@ services:
       context: .
       dockerfile: ./php/php.dockerfile
       args:
-        dbname: ${MYSQL_DATABASE}
-        dbuser: ${MYSQL_USER}
-        dbpass: ${MYSQL_PASSWORD}
-        dbhost: mysql
-        url: nginx/wordpress
-        title: ${SITE_TITLE}
-        admin_user: ${ADMIN_USER}
-        admin_password: ${ADMIN_PASSWORD}
-        admin_email: ${ADMIN_EMAIL}
+        dbname: ${MYSQL_WORDPRESS_DATABASE}
+        dbuser: ${MYSQL_WORDPRESS_USER}
+        dbpass: ${MYSQL_WORDPRESS_USER_PASSWORD}
+        dbhost: ${ALIAS_MYSQL}
+        url: "${ALIAS_NGINX}/wordpress"
+        title: ${WP_SITE_TITLE}
+        admin_user: ${WP_ADMIN_USER}
+        admin_password: ${WP_ADMIN_PASSWORD}
+        admin_email: ${WP_ADMIN_EMAIL}
+    networks:
+      default:
+        aliases:
+          - ${ALIAS_PHP}
     volumes:
       - ../jds-demo-plugin:/var/www/html/wordpress/wp-content/plugins/jds-demo-plugin
