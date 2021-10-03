@@ -1,4 +1,5 @@
 <?php
+
 namespace Helper;
 
 // here you can define custom actions
@@ -6,7 +7,8 @@ namespace Helper;
 
 use Codeception\Module;
 
-class Functional extends Module
+class Integration extends Module
 {
-
+    use SharedHelperTrait;
+    use DbModuleHelperTrait;
 }

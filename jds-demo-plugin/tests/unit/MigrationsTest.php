@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpIllegalPsrClassPathInspection */
+
 namespace JdsDemoPlugin\Tests;
 
 use Codeception\Test\Unit;

@@ -16,13 +16,13 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `names`
+-- Table structure for table `jdsdp_names`
 --
 
-DROP TABLE IF EXISTS `names`;
+DROP TABLE IF EXISTS `jdsdp_names`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `names` (
+CREATE TABLE `jdsdp_names` (
 						 `id` int NOT NULL AUTO_INCREMENT,
 						 `name` varchar(255) DEFAULT NULL,
 						 PRIMARY KEY (`id`)
@@ -30,13 +30,13 @@ CREATE TABLE `names` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `names`
+-- Dumping data for table `jdsdp_names`
 --
 
-LOCK TABLES `names` WRITE;
-/*!40000 ALTER TABLE `names` DISABLE KEYS */;
-INSERT INTO `names` VALUES (1,'Alice'),(2,'Bob'),(3,'Carol');
-/*!40000 ALTER TABLE `names` ENABLE KEYS */;
+LOCK TABLES `jdsdp_names` WRITE;
+/*!40000 ALTER TABLE `jdsdp_names` DISABLE KEYS */;
+INSERT INTO `jdsdp_names` VALUES (1,'Alice'),(2,'Bob'),(3,'Carol');
+/*!40000 ALTER TABLE `jdsdp_names` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 

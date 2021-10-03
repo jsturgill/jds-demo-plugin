@@ -1,20 +1,20 @@
 <?php
 
+/** @noinspection PhpIllegalPsrClassPathInspection */
+
 namespace JdsDemoPlugin\Tests;
 
 use Codeception\Test\Unit;
 use JdsDemoPlugin\Exceptions\InvalidArgumentException;
 use JdsDemoPlugin\Services\FileSystem;
+use UnitTester;
 
 class FileSystemTest extends Unit
 {
     public const PATH_PARTIAL = 'cache/file-system-test';
     public const IDENTIFIERS_WITH_GITIGNORE = ['b'];
 
-    /**
-     * @var \UnitTester
-     */
-    protected $tester;
+    protected UnitTester $tester;
     private FileSystem $fileSystem;
 
     /**

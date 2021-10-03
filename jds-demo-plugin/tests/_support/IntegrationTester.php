@@ -2,7 +2,6 @@
 
 use Codeception\Actor;
 
-
 /**
  * Inherited Methods
  * @method void wantToTest($text)
@@ -18,9 +17,9 @@ use Codeception\Actor;
  *
  * @SuppressWarnings(PHPMD)
 */
-class FunctionalTester extends Actor
+class IntegrationTester extends Actor
 {
-    use _generated\FunctionalTesterActions;
+    use _generated\IntegrationTesterActions;
 
     /**
      * Define custom actions here

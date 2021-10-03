@@ -1,0 +1,13 @@
+actor: IntegrationTester
+modules:
+  enabled:
+    # https://codeception.com/docs/modules/Db
+    - Db:
+        dsn: "mysql:host=%DBHOST%;port=3306;dbname=%DBNAME%"
+        user: "%DBUSER%"
+        password: "%DBPASS%"
+        populate: true
+        cleanup: true
+        dump: 'tests/_data/dump.sql'
+    - Asserts
+    - \Helper\Integration

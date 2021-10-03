@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection PhpIllegalPsrClassPathInspection */
+
 use JdsDemoPlugin\Plugin;
 
 class BasicFunctionalityCest
