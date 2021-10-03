@@ -1,6 +1,5 @@
 version: '3.9'
 services:
   php:
-    command: sh -c "/var/scripts/init-wp.sh && /var/scripts/start-php.sh"
     volumes:
-      - ../build:/var/www/html/wp-content/plugins/jds-demo-plugin
+      - ../build:/var/www/html/wordpress/wp-content/plugins/jds-demo-plugin

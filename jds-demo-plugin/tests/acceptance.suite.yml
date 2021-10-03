@@ -8,9 +8,11 @@ actor: AcceptanceTester
 modules:
     enabled:
         - WebDriver:
-            url: http://nginx/wordpress
+            url: "https://%WP_HOST%%WP_PATH%"
             browser: chrome
             host: chrome
+            capabilities:
+              acceptInsecureCerts: true
         - \Helper\Acceptance
-step_decorators:
-  - \Codeception\Step\Retry
+    step_decorators:
+      - \Codeception\Step\Retry

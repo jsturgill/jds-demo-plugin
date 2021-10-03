@@ -10,7 +10,7 @@ class MySqlQueries
         $this->persistenceConfig = $persistenceConfig;
     }
 
-    public function getRandomNameQuery(string $prefix, string $unescapedWhereConditions = ''): string
+    public function getRandomNameQuery(string $prefix = '', string $unescapedWhereConditions = ''): string
     {
         return 'select `name`
 from ' . $prefix . $this->persistenceConfig->namesTable . '

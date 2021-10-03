@@ -21,6 +21,13 @@ The example commands in this documentation expect `dev-utils` to be initialized 
 certain `.phar` files and installing composer dependencies. All of this is taken care of by 
 running `init.sh` in the root directory.
 
+## Dev SSL Cert
+
+A development SSL cert and key are placed in `docker/nginx/files` when `init.sh` is run.
+
+If relevant aliases are changed in `docker/.env`, the cert may need to be rebuilt. You can do this by running
+`./create-dev-cert.sh` at any time.
+
 ## Tests
 
 To run tests within docker:
@@ -94,15 +101,24 @@ Then visit `http://nginx/wordpress`.
 Note: this requires an entry in your hosts file pointing host `nginx` to localhost.  In windows, the hosts file is 
 located at `C:\Windows\System32\drivers\etc\hosts`. In linux, the hosts file is likely at `/etc/hosts`.
 
+An example hosts entry:
+
+```bash
+# values from docker/.env aliases
+127.0.0.1 jdsdemo.test mysql.jdsdemo.test chrome.jdsdemo.test
+```
+
 ## Clean Start
 
 To blow away docker resources related to this project:
 
 ```bash
-# specify the relevant .yml file and call the "down" command
+# specify the relevant .yml file(s) and call the "down" command
 docker compose -f docker/docker-compose.yml down
 
-# to completely reset:
-
+# to completely reset, include `--rmi all --volumes`:
 docker compose -f docker/docker-compose.yml down --rmi all --volumes
+
+# to remove all images
+docker rmi $(docker images -a -q)
 ```
