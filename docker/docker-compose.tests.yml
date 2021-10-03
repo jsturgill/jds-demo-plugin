@@ -7,6 +7,10 @@ services:
       args:
         admin_user: ${ADMIN_USER}
         admin_password: ${ADMIN_PASSWORD}
+        dbname: ${MYSQL_DATABASE}
+        dbuser: ${MYSQL_USER}
+        dbpass: ${MYSQL_PASSWORD}
+        dbhost: mysql
 #    entrypoint: ''
 #    command: sleep infinity
     environment:
@@ -18,6 +22,7 @@ services:
       - chrome
       - php
       - nginx
+      - mysql
   chrome:
     image: "selenium/standalone-chrome-debug:latest"
 
