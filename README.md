@@ -99,10 +99,10 @@ located at `C:\Windows\System32\drivers\etc\hosts`. In linux, the hosts file is 
 To blow away docker resources related to this project:
 
 ```bash
-# specify the relevant .yml file and call the "down" command
+# specify the relevant .yml file(s) and call the "down" command
 docker compose -f docker/docker-compose.yml down
 
-# to completely reset:
+# to completely reset, include `--rmi all --volumes`:
 
 docker compose -f docker/docker-compose.yml down --rmi all --volumes
 ```

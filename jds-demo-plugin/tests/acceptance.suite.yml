@@ -12,5 +12,5 @@ modules:
             browser: chrome
             host: chrome
         - \Helper\Acceptance
-step_decorators:
-  - \Codeception\Step\Retry
+    step_decorators:
+      - \Codeception\Step\Retry

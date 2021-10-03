@@ -7,8 +7,8 @@ services:
       args:
         admin_user: ${ADMIN_USER}
         admin_password: ${ADMIN_PASSWORD}
-        dbname: ${MYSQL_DATABASE}
-        dbuser: ${MYSQL_USER}
+        dbname: ${MYSQL_TEST_DATABASE}
+        dbuser: ${MYSQL_TEST_USER}
         dbpass: ${MYSQL_PASSWORD}
         dbhost: mysql
 #    entrypoint: ''

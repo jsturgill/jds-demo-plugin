@@ -8,6 +8,13 @@
 actor: FunctionalTester
 modules:
     enabled:
-        # add a framework module here
+        # https://codeception.com/docs/modules/Db
+        - Db:
+            dsn: "mysql:host=%DBHOST%;port=3306;dbname=%DBNAME%"
+            user: "%DBUSER%"
+            password: "%DBPASS%"
+            populate: true
+            cleanup: true
+            dump: 'tests/_data/dump.sql'
         - \Helper\Functional
-    step_decorators: ~        
+    step_decorators: ~

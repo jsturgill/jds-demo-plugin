@@ -12,7 +12,9 @@ services:
       - php
       - mysql
   mysql:
-    image: mysql:latest
+    build:
+      context: .
+      dockerfile: ./mysql/mysql.dockerfile
     restart: always
     ports:
       - ${LOCAL_MYSQL_PORT}:3306
@@ -21,6 +23,9 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_TEST_DATABASE: ${MYSQL_TEST_DATABASE}
+      MYSQL_TEST_USER: ${MYSQL_TEST_USER}
+      MYSQL_TEST_USER_PASSWORD: ${MYSQL_TEST_USER_PASSWORD}
   php:
     depends_on:
       - mysql
