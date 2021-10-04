@@ -96,10 +96,12 @@ To test drive the build on localhost:
 docker-compose -f docker/docker-compose.yml -f docker/docker-compose.serve-prod-build.yml up --abort-on-container-exit --exit-code-from php
 ```
 
-Then visit `http://nginx/wordpress`.
+Then visit `https://{ALIAS_NGINX}/wordpress`. You will likely be prompted to accept a self-signed certificate.
 
-Note: this requires an entry in your hosts file pointing host `nginx` to localhost.  In windows, the hosts file is 
-located at `C:\Windows\System32\drivers\etc\hosts`. In linux, the hosts file is likely at `/etc/hosts`.
+Note: `{ALIAS_NGINX}` is defined in `docker/.env` and defaults to `jdsdemo.test`
+
+Note: this requires an entry in your hosts file pointing host `{ALIAS_NGINX}` to localhost.  In windows, the hosts file is 
+located at `C:\Windows\System32\drivers\etc\hosts`. In linux, try `/etc/hosts`.
 
 An example hosts entry:
 
