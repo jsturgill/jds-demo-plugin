@@ -7,11 +7,25 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2021-08-26T19:49:57+00:00\n"
+"POT-Creation-Date: 2021-10-04T03:25:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.5.0\n"
 
-#: Plugin.php:20
-#: Plugin.php:21
+#: jds-demo-plugin-options.php:2
+msgid "Demo \"Plugin\" Page"
+msgstr ""
+
+#. translators: casual greeting
+#: jds-demo-plugin-options.php:4
+msgid "Hello, %s!"
+msgstr ""
+
+#. translators: casual greeting
+#: jds-demo-plugin-options.php:5
+msgid "Hit refresh to view another name (selected at random)."
+msgstr ""
+
+#: Plugin.php:89
+#: Plugin.php:90
 msgid "JDS Demo Plugin"
 msgstr ""
